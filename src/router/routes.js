@@ -1,8 +1,8 @@
 import layout from '../layout/layout'
-import components from './modules/components'
-import tableDemo from './modules/tableDemo'
-import errorPage from './modules/errorPage'
-import nested from './modules/nested'
+import org from './modules/org'
+import auth from './modules/auth'
+import logs from './modules/logs'
+import setting from './modules/setting'
 
 /**
  * router自定义配置项
@@ -18,10 +18,7 @@ import nested from './modules/nested'
   }
  **/
 export const asyncRouterMap = [
-  components,
-  tableDemo,
-  errorPage,
-  nested,
+  org, auth, logs, setting,
   { path: '*', redirect: '/404', hidden: true }
 ]
 
