@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'paramType'
+    name: 'ParamType'
   }
 </script>

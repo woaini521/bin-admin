@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'dict'
+    name: 'Dict'
   }
 </script>

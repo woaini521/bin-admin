@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'funcLog'
+    name: 'FuncLog'
   }
 </script>

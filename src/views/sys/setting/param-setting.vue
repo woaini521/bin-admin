@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'paramSetting'
+    name: 'ParamSetting'
   }
 </script>

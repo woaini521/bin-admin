@@ -6,6 +6,6 @@
 
 <script>
   export default {
-    name: 'sysLog'
+    name: 'SysLog'
   }
 </script>
