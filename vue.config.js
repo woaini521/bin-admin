@@ -11,11 +11,12 @@ module.exports = {
     ? '/preview/bin-admin'
     : '/',
   // dev跨域问题
-  // devServer: {
-  //   proxy: {
-  //     '/admin': { target: 'http://localhost:8088/cms' }
-  //   }
-  // },
+  devServer: {
+    proxy: {
+      '/auth': { target: 'http://localhost:8081/' },
+      '/user': { target: 'http://localhost:8081/' }
+    }
+  },
   productionSourceMap: false,
   lintOnSave: process.env.NODE_ENV !== 'production',
   assetsDir: 'static',

@@ -11,17 +11,17 @@
       </div>
       <div class="right-ctrl" flex="cross:center">
         <!--外部链接-->
-        <a href="#" target="_blank" class="btn">
-        <span class="action">
-          <b-icon name="ios-help-circle"></b-icon>
-        </span>
-        </a>
-        <div class="btn">
-          <b-icon name="ios-notifications-outline"></b-icon>
-        </div>
-        <div class="btn">
-          <b-icon name="ios-bug"></b-icon>
-        </div>
+        <!--<a href="#" target="_blank" class="btn">-->
+        <!--<span class="action">-->
+          <!--<b-icon name="ios-help-circle"></b-icon>-->
+        <!--</span>-->
+        <!--</a>-->
+        <!--<div class="btn">-->
+          <!--<b-icon name="ios-notifications-outline"></b-icon>-->
+        <!--</div>-->
+        <!--<div class="btn">-->
+          <!--<b-icon name="ios-bug"></b-icon>-->
+        <!--</div>-->
         <div class="btn">
           <theme-setting></theme-setting>
         </div>

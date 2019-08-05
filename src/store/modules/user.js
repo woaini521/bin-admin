@@ -1,4 +1,5 @@
-import { login, getInfo } from '../../api/login'
+import { login } from '../../api/auth'
+import { getInfo } from '../../api/user'
 import util from '../../utils/util'
 import { ACCESS_TOKEN } from '../mutation-types'
 import { resetRouter } from '../../router'
@@ -25,13 +26,13 @@ export default {
     login ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
-          const result = response.data.data
+          const token = response.data.data
           // console.log('vuex:')
-          // console.log(result)
+          console.log(token)
           // 设置token
-          util.cookies.set(ACCESS_TOKEN, result.token)
-          commit('SET_TOKEN', result.token)
-          resolve(result)
+          util.cookies.set(ACCESS_TOKEN, token)
+          commit('SET_TOKEN', token)
+          resolve(token)
         }).catch(error => {
           console.log('error')
           reject(error)
@@ -56,10 +57,9 @@ export default {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
           const result = response.data.data
-          // console.log(result)
-          // 判断角色权限是否存在
-          if (result.roles && result.roles.length > 0) {
-            commit('SET_ROLES', result.roles)
+          // 判断角色权限是否存在,这里约定为roleCodes
+          if (result.roleCodes && result.roleCodes.length > 0) {
+            commit('SET_ROLES', result.roleCodes)
             commit('SET_INFO', result)
           } else {
             reject(new Error('getInfo: roles must be a non-null array !'))

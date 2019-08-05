@@ -3,7 +3,7 @@
     <b-dropdown>
       <span class="user-link">
         <i class="iconfont icon-ios-contact"></i>
-        <span>你好,{{userInfo.name}}</span>
+        <span>{{userInfo.realName}}</span>
       </span>
       <b-dropdown-menu slot="list">
         <b-dropdown-item @click.native="handleLogout">

@@ -1,9 +1,6 @@
 <template>
   <b-container>
     <div class="index-wrap">
-      <div class="logo">
-        <img src="../../assets/images/logo.png" height="54" width="233" alt="logo"/>
-      </div>
       <div class="info">
         <h2>介绍</h2>
         <p>
@@ -14,51 +11,6 @@
         <b-alert show-icon>
           本项目默认你有一定的 Vue 基础和 bin-ui , element-ui 使用经验,如果你对这些还不熟悉，我们建议你先查阅相关文档，下方会统一给出文档连接
         </b-alert>
-        <p>
-          我们基于上述目标和提供了以下的典型模板，并据此构建了一套基于 bin-ui 、element-ui 的中后台管理控制台的脚手架，它可以帮助你快速搭建企业级中后台产品原型。
-        </p>
-        <pre>
-          <code>
-            - index
-              - 首页工作台
-            - 表单页
-              - 基础表单页
-              - 分步表单页
-              - 高级表单页
-            - 列表页
-              - 查询表格
-              - 标准列表
-              - 卡片列表
-              - 搜索列表（项目/应用/文章）
-            - 详情页
-              - 基础详情页
-              - 高级详情页
-            - 结果
-              - 成功页
-              - 失败页
-            - 异常
-              - 403 无权限
-              - 404 找不到
-              - 500 服务器出错
-            - 个人页
-              - 个人中心
-              - 个人设置
-            - 帐户
-              - 登录
-              - 注册
-              - 注册成功
-          </code>
-        </pre>
-        <h2>前序准备</h2>
-        <p>你的本地环境需要安装 node 和 git。我们的技术栈基于 ES2015+、Vue.Js、Vuex、Vue-Router、bin-ui 和 element-ui，提前了解和学习这些知识会非常有帮助。</p>
-
-        <h2>文档连接</h2>
-        <p>
-          <a class="link" href="https://github.com/wangbin3162/bin-admin.git" target="_blank">仓库地址</a>
-          <a class="link" href="https://wangbin3162.github.io/bin-ui-doc/" target="_blank">bin-ui</a>
-          <a class="link" href="https://element.eleme.cn/#/zh-CN/component/installation" target="_blank">element-ui</a>
-          <a class="link" href="https://cn.vuejs.org/v2/guide/" target="_blank">Vue</a>
-        </p>
       </div>
     </div>
   </b-container>

@@ -4,7 +4,7 @@
       <div class="logo" flex="cross:center">
         <img class="icon" src="../assets/images/logo-icon-b.png" alt="logo-small"/>
         <transition name="zoom-in">
-          <h1 v-show="sidebar">Bin Admin</h1>
+          <h1 v-show="sidebar">新云信用管理系统</h1>
         </transition>
       </div>
       <div class="aside">
