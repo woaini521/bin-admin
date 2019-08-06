@@ -53,7 +53,7 @@ router.beforeEach((to, from, next) => {
               '/org', '/org/user', '/org/dept',
               '/auth', '/auth/menu', '/auth/role',
               '/logs', '/logs/sysLog', '/logs/funcLog',
-              '/settings', '/settings/dict', '/settings/paramType', '/settings/paramSetting'
+              '/setting', '/setting/dict', '/setting/paramType', '/setting/paramSetting'
             ]
             // const functions = res.data.data.functions || []
             // 根据用户角色获取用户菜单路由,如线上项目则可以直接拉取用户的菜单，注意：菜单可以直接复制路由

@@ -9,13 +9,13 @@ export default {
     {
       path: 'menu',
       name: 'Menu',
-      component: () => import('../../views/sys/auth/menu'),
+      component: () => import(/* webpackChunkName: "auth" */ '../../views/sys/auth/menu'),
       meta: { title: '菜单管理' }
     },
     {
       path: 'role',
       name: 'Role',
-      component: () => import('../../views/sys/auth/role'),
+      component: () => import(/* webpackChunkName: "auth" */ '../../views/sys/auth/role'),
       meta: { title: '角色管理' }
     }
   ]

@@ -9,13 +9,13 @@ export default {
     {
       path: 'user',
       name: 'User',
-      component: () => import('../../views/sys/org/user'),
+      component: () => import(/* webpackChunkName: "org" */ '../../views/sys/org/user'),
       meta: { title: '用户管理' }
     },
     {
       path: 'dept',
       name: 'Dept',
-      component: () => import('../../views/sys/org/dept'),
+      component: () => import(/* webpackChunkName: "org" */ '../../views/sys/org/dept'),
       meta: { title: '部门管理' }
     }
   ]

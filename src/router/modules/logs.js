@@ -9,13 +9,13 @@ export default {
     {
       path: 'sysLog',
       name: 'SysLog',
-      component: () => import('../../views/sys/logs/sys-log'),
+      component: () => import(/* webpackChunkName: "logs" */ '../../views/sys/logs/sys-log'),
       meta: { title: '系统日志' }
     },
     {
       path: 'funcLog',
       name: 'FuncLog',
-      component: () => import('../../views/sys/logs/func-log'),
+      component: () => import(/* webpackChunkName: "logs" */ '../../views/sys/logs/func-log'),
       meta: { title: '功能日志' }
     }
   ]
