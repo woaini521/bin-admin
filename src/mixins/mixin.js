@@ -1,6 +1,7 @@
 export default {
   data () {
     return {
+      currentTreeNode: null,
       filterOpened: false, // 查询列表是否打开
       listQuery: { // 查询通用条件,组件内部的可删除
         size: 10,
@@ -39,11 +40,22 @@ export default {
     /**
      * 一、mixin中公共方法都以下划线为前缀区分是自身还是公共方法
      */
-    // 2.3分页事件 hank 组件内部overwrite
+    // 2.设置列表数据
+    _setListData (obj) {
+      if (obj) {
+        this.list = obj.list
+        this.total = obj.total
+        this.listLoading = false
+      } else {
+        this.list = []
+        this.listLoading = true
+      }
+    },
+    // 2.3 分页事件 hank 组件内部overwrite
     searchList () {
       console.error('searchList need overwrite (from mixin)')
     },
-    // 2.4查询条件查询
+    // 2.4 查询条件查询
     handleFilter () {
       this.listQuery.page = 1
       this.searchList()

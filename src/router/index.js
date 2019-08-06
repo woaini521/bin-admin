@@ -49,15 +49,15 @@ router.beforeEach((to, from, next) => {
           .then(res => {
             // 获取所有功能菜单
             // 测试功能菜单筛选集合
-            let testFunctions = [
-              '/org', '/org/user', '/org/dept',
-              '/auth', '/auth/menu', '/auth/role',
-              '/logs', '/logs/sysLog', '/logs/funcLog',
-              '/setting', '/setting/dict', '/setting/paramType', '/setting/paramSetting'
-            ]
-            // const functions = res.data.data.functions || []
+            // let testFunctions = [
+            //   '/org', '/org/user', '/org/dept',
+            //   '/auth', '/auth/menu', '/auth/role',
+            //   '/logs', '/logs/sysLog', '/logs/funcLog',
+            //   '/setting', '/setting/dict', '/setting/paramType', '/setting/paramSetting'
+            // ]
+            const functions = res.data.data.functions || []
             // 根据用户角色获取用户菜单路由,如线上项目则可以直接拉取用户的菜单，注意：菜单可以直接复制路由
-            store.dispatch('generateRoutes', testFunctions).then((res) => {
+            store.dispatch('generateRoutes', functions).then((res) => {
               // 根据roles权限生成可访问的路由表
               // 动态添加可访问路由表
               router.addRoutes(res)

@@ -14,7 +14,8 @@ module.exports = {
   devServer: {
     proxy: {
       '/auth': { target: 'http://localhost:8081/' },
-      '/user': { target: 'http://localhost:8081/' }
+      '/user': { target: 'http://localhost:8081/' },
+      '/management': { target: 'http://localhost:8081/' }
     }
   },
   productionSourceMap: false,

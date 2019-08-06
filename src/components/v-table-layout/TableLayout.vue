@@ -7,7 +7,7 @@
     </div>
     <div class="table-view">
       <slot name="filter" v-if="$slots.filter">查询条件插槽</slot>
-      <div class="button-bar" v-if="$slots.ctrl">
+      <div class="button-bar">
         <b-button type="primary" v-waves size="small" @click="handleAdd">
           <i class="el-icon-circle-plus-outline"></i> 新增
         </b-button>
