@@ -8,7 +8,7 @@ export default {
   state: {
     token: '', // token
     roles: [],
-    info: {} // user的登录信息
+    info: null // user的登录信息
   },
   mutations: {
     SET_TOKEN: (state, token) => {
@@ -56,15 +56,15 @@ export default {
     getUserInfo ({ commit }) {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
-          const result = response.data.data
+          const result = response.data
           // 判断角色权限是否存在,这里约定为roleCodes
-          if (result.roleCodes && result.roleCodes.length > 0) {
-            commit('SET_ROLES', result.roleCodes)
-            commit('SET_INFO', result)
-          } else {
-            reject(new Error('getInfo: roles must be a non-null array !'))
+          if (result.code === '0') {
+            commit('SET_ROLES', result.data.roleCodes)
+            commit('SET_INFO', result.data)
+            resolve(response)
+          } else if (result.code === '403') { // 如果是403 即为无效的token则重定向到login页面
+            reject(result)
           }
-          resolve(response)
         }).catch(error => {
           reject(error)
         })

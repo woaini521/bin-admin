@@ -1,7 +1,7 @@
 import layout from '../../layout/layout'
 
 export default {
-  path: '/setting',
+  path: '/settings',
   component: layout,
   redirect: { name: 'Dict' },
   meta: { title: '系统设置', icon: 'ios-settings' },

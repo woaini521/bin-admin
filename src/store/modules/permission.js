@@ -3,27 +3,32 @@ import { asyncRouterMap, constantRouterMap } from '../../router/routes'
 /**
  * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除,这里暂时通过这种方式获取
  *
- * @param roles
- * @param route
+ * @param functions 所有用户路由权限列表
+ * @param  route 路由
+ * @param parentPath
  * @returns {boolean}
  */
-function hasPermission (roles, route) {
+function hasPermission (functions, route, parentPath = '') {
   if (route.meta && route.meta.roles) {
-    return roles.some(role => route.meta.roles.includes(role))
-  } else {
     return true
+  } else {
+    const tempPath = parentPath.length > 0 ? parentPath + '/' + route.path : route.path
+    return functions.indexOf(tempPath) > -1
   }
 }
 
-function filterAsyncRoutes (routes, roles) {
+function filterAsyncRoutes (routes, functions, parentPath = '') {
   const res = []
   routes.forEach(route => {
     const tmp = { ...route }
-    if (hasPermission(roles, tmp)) {
+    if (hasPermission(functions, tmp, parentPath)) {
+      // console.log(`匹配[${parentPath.length === 0 ? '父级路由' : '子路由'}] ${tmp.path} 路由成功`)
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, roles)
+        tmp.children = filterAsyncRoutes(tmp.children, functions, tmp.path)
       }
-      res.push(tmp)
+      if (!tmp.children || tmp.children.length > 0) {
+        res.push(tmp)
+      }
     }
   })
 
@@ -42,9 +47,9 @@ const permission = {
     }
   },
   actions: {
-    generateRoutes ({ commit }, roles) {
+    generateRoutes ({ commit }, functions) {
       return new Promise(resolve => {
-        const accessedRouters = filterAsyncRoutes(asyncRouterMap, roles)
+        const accessedRouters = filterAsyncRoutes(asyncRouterMap, functions)
         commit('SET_ROUTERS', accessedRouters)
         resolve(accessedRouters)
       })
