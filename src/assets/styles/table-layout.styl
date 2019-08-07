@@ -21,10 +21,12 @@
   }
   .table-view {
     flex: 1;
-    padding: 20px 0 20px 20px;
     background: #fff;
     border-top-right-radius: 5px;
     border-bottom-right-radius: 5px;
+    .view-inner {
+      padding: 20px 0 0 20px;
+    }
     .table-inner {
       padding-top: 10px;
     }
@@ -74,6 +76,8 @@
 }
 
 .page-bar {
-  padding-top: 20px;
   text-align: right;
+  .bin-page-options {
+    vertical-align: top;
+  }
 }

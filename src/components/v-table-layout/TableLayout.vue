@@ -8,7 +8,7 @@
       </div>
     </div>
     <div class="table-view">
-      <b-container>
+      <b-container footer-fixed>
         <div class="view-inner" style="margin-right: 20px;">
           <slot name="filter" v-if="$slots.filter">查询条件插槽</slot>
           <div class="button-bar">
@@ -20,9 +20,9 @@
           <div class="table-inner">
             <slot name="table"></slot>
           </div>
-          <div class="page-bar">
-            <slot name="pager"></slot>
-          </div>
+        </div>
+        <div class="page-bar" slot="footer">
+          <slot name="pager"></slot>
         </div>
       </b-container>
     </div>

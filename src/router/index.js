@@ -80,6 +80,7 @@ router.beforeEach((to, from, next) => {
                 BinUI.LoadingBar.done()
               })
             }
+            console.log(err)
           })
       }
     }

@@ -15,7 +15,7 @@
         <a href="" @click.stop.prevent="handleCheck(scope.row)">查看</a>
       </template>
     </b-table>
-    <b-page slot="pager" :total="100" show-sizer></b-page>
+    <b-page slot="pager" :total="total" show-sizer></b-page>
   </v-table-layout>
 </template>
 
@@ -34,10 +34,10 @@
         },
         treeData: [],
         columns: [
-          { title: '部门名称', key: 'departName', minWidth: 220 },
-          { title: '统一社会信用代码', key: 'unifiedCode', minWidth: 300 },
-          { title: '部门全称', key: 'fullName', minWidth: 220 },
-          { title: '操作', slot: 'action', width: 150 }
+          { title: '部门名称', key: 'departName' },
+          { title: '统一社会信用代码', key: 'unifiedCode' },
+          { title: '部门全称', key: 'fullName' },
+          { title: '操作', slot: 'action', width: 150, align: 'center' }
         ]
       }
     },
