@@ -1,19 +1,22 @@
 <template>
-  <b-container ref="container" bg-color="#f0f2f8">
-    <v-table-layout>
-      <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
-      <!--查询条件-->
-      <v-filter-bar slot="filter">
-        <v-filter-item title="部门名称">
-          <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
-        </v-filter-item>
-        <!--添加查询按钮位置-->
-        <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
-      </v-filter-bar>
-      <b-table slot="table" :columns="columns" :data="data" border stripe></b-table>
-      <b-page slot="pager" :total="100" show-sizer></b-page>
-    </v-table-layout>
-  </b-container>
+  <v-table-layout>
+    <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
+    <!--查询条件-->
+    <v-filter-bar slot="filter">
+      <v-filter-item title="部门名称">
+        <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
+      </v-filter-item>
+      <!--添加查询按钮位置-->
+      <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
+    </v-filter-bar>
+    <!--中央表格-->
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe>
+      <template v-slot:action="scope">
+        <a href="" @click.stop.prevent="handleCheck(scope.row)">查看</a>
+      </template>
+    </b-table>
+    <b-page slot="pager" :total="100" show-sizer></b-page>
+  </v-table-layout>
 </template>
 
 <script>
@@ -31,84 +34,10 @@
         },
         treeData: [],
         columns: [
-          {
-            title: '姓名',
-            key: 'name'
-          },
-          {
-            title: '年龄',
-            key: 'age'
-          },
-          {
-            title: '出生日期',
-            key: 'birthday'
-          },
-          {
-            title: '地址',
-            key: 'address'
-          }
-        ],
-        data: [
-          {
-            name: '王小明',
-            age: 18,
-            birthday: '1990-04-22',
-            address: '北京市朝阳区芍药居'
-          },
-          {
-            name: '张小刚',
-            age: 25,
-            birthday: '1990-02-11',
-            address: '北京市海淀区西二旗'
-          },
-          {
-            name: '李小红',
-            age: 30,
-            birthday: '1991-06-16',
-            address: '上海市浦东新区世纪大道'
-          },
-          {
-            name: '周小伟',
-            age: 26,
-            birthday: '1992-09-02',
-            address: '深圳市南山区深南大道'
-          },
-          {
-            name: '张小发',
-            age: 33,
-            birthday: '1989-12-22',
-            address: '南京市龙眠大道'
-          },
-          {
-            name: '张小刚',
-            age: 25,
-            birthday: '1990-02-11',
-            address: '北京市海淀区西二旗'
-          },
-          {
-            name: '李小红',
-            age: 30,
-            birthday: '1991-06-16',
-            address: '上海市浦东新区世纪大道'
-          },
-          {
-            name: '周小伟',
-            age: 26,
-            birthday: '1992-09-02',
-            address: '深圳市南山区深南大道'
-          },
-          {
-            name: '张小发',
-            age: 33,
-            birthday: '1989-12-22',
-            address: '南京市龙眠大道'
-          },
-          {
-            name: '张小发',
-            age: 33,
-            birthday: '1989-12-22',
-            address: '南京市龙眠大道'
-          }
+          { title: '部门名称', key: 'departName', minWidth: 220 },
+          { title: '统一社会信用代码', key: 'unifiedCode', minWidth: 300 },
+          { title: '部门全称', key: 'fullName', minWidth: 220 },
+          { title: '操作', slot: 'action', width: 150 }
         ]
       }
     },
@@ -127,6 +56,9 @@
           size: 10,
           departName: ''
         }
+      },
+      handleCheck (row) {
+        console.log(row)
       },
       /** [数据接口] **/
       // tree:初始化树结构
@@ -155,14 +87,14 @@
       },
       // 查询所有部门列表
       searchList () {
-        // this._setListData()
+        this._setListData()
         api.getDeptList(this.listQuery).then(response => {
           if (response.status === 200) {
-            console.log(response.data)
-            // this._setListData({
-            //   list: response.data.rows,
-            //   total: response.data.total
-            // })
+            this._setListData({
+              list: response.data.rows,
+              total: response.data.total
+            })
+            this.$print(this.list)
           }
         })
       }

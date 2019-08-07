@@ -1,4 +1,3 @@
-import { login } from '../../api/auth'
 import { getInfo } from '../../api/user'
 import util from '../../utils/util'
 import { ACCESS_TOKEN } from '../mutation-types'
@@ -23,20 +22,15 @@ export default {
   },
   actions: {
     // 登录
-    login ({ commit }, userInfo) {
+    setToken ({ commit }, token) {
       return new Promise((resolve, reject) => {
-        login(userInfo).then(response => {
-          const token = response.data.data
-          // console.log('vuex:')
-          console.log(token)
-          // 设置token
+        try {
           util.cookies.set(ACCESS_TOKEN, token)
           commit('SET_TOKEN', token)
           resolve(token)
-        }).catch(error => {
-          console.log('error')
-          reject(error)
-        })
+        } catch (e) {
+          reject(e)
+        }
       })
     },
     // 登出

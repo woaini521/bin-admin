@@ -44,7 +44,7 @@
 </template>
 
 <script>
-  import { getVerifyCode } from '../../api/auth'
+  import { getVerifyCode, login } from '../../api/auth'
   import util from '../../utils/util'
 
   export default {
@@ -94,7 +94,7 @@
         this.$refs.loginForm.validate((valid) => {
           if (valid) {
             // 登录
-            this.$store.dispatch('login', this.formLogin)
+            login(this.formLogin)
               .then((res) => this.loginSuccess(res))
               .catch(err => this.requestFailed(err))
           } else {
@@ -104,13 +104,18 @@
         })
       },
       loginSuccess (res) {
-        this.$log.success('登录成功')
-        // 重定向对象不存在则返回顶层路径
-        this.$router.replace(this.$route.query.redirect || '/')
-        // 延迟 1 秒显示欢迎信息
-        setTimeout(() => {
-          this.$message({ content: `${util.timeFix()}，欢迎回来`, type: 'success' })
-        }, 1000)
+        if (res.data.code === '0') {
+          const token = res.data.data
+          this.$log.success('登录成功')
+          this.$store.dispatch('setToken', token).then(() => {
+            // 重定向对象不存在则返回顶层路径
+            this.$router.replace(this.$route.query.redirect || '/')
+            // 延迟 1 秒显示欢迎信息
+            setTimeout(() => {
+              this.$message({ content: `${util.timeFix()}，欢迎回来`, type: 'success' })
+            }, 1000)
+          })
+        }
       },
       // 登录失败
       requestFailed (err) {

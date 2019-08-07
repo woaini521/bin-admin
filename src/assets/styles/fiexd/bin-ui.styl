@@ -28,6 +28,7 @@
   margin-left: 10px;
 }
 
+// 树
 .bin-tree ul li {
   margin: 0;
   line-height: 26px;
@@ -51,4 +52,31 @@
 .bin-tree-title-selected, .bin-tree-title-selected:hover {
   background-color: #1890ff;
   color: #fff;
+}
+//  表格
+.bin-table-wrapper {
+  border: none;
+  .bin-loading {
+    border: none;
+  }
+}
+.bin-table {
+  .bin-table-header th, .bin-table-fixed-header th {
+    color: #333;
+    background-color: #f3faff;
+  }
+  th, td {
+    line-height: 38px;
+    border-bottom: none;
+  }
+  &:before, &:after {
+    display: none;
+  }
+}
+
+.bin-table-fixed-right::before, .bin-table-fixed::before {
+  display: none;
+}
+.bin-table-fixed-right {
+  box-shadow: 0 0 10px rgba(0, 0, 0, .12)
 }
