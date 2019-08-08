@@ -11,10 +11,7 @@
       <b-container footer-fixed>
         <div class="view-inner" style="margin-right: 20px;">
           <slot name="filter" v-if="$slots.filter">查询条件插槽</slot>
-          <div class="button-bar">
-            <b-button type="primary" v-waves size="small" @click="handleAdd">
-              <i class="el-icon-circle-plus-outline"></i> 新增
-            </b-button>
+          <div class="button-bar" v-if="$slots.ctrl">
             <slot name="ctrl"></slot>
           </div>
           <div class="table-inner">
@@ -25,17 +22,13 @@
           <slot name="pager"></slot>
         </div>
       </b-container>
+      <slot></slot>
     </div>
   </div>
 </template>
 
 <script>
   export default {
-    name: 'VTableLayout',
-    methods: {
-      handleAdd () {
-        this.$emit('on-create')
-      }
-    }
+    name: 'VTableLayout'
   }
 </script>

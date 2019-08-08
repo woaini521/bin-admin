@@ -9,6 +9,7 @@ import TitleBar from '../components/v-title-bar/index'
 import FilterBar from '../components/v-filter-bar/FilterBar'
 import FilterItem from '../components/v-filter-bar/FilterItem'
 import TableLayout from '../components/v-table-layout/TableLayout'
+import KeyLabel from '../components/v-key-label/KeyLabel'
 
 export default {
   async install (Vue, options) {
@@ -24,6 +25,8 @@ export default {
     Vue.component(FilterItem.name, FilterItem)
     // 表格布局
     Vue.component(TableLayout.name, TableLayout)
+    // 查看显示组件
+    Vue.component(KeyLabel.name, KeyLabel)
     // 全局通信
     Vue.prototype.$EventBus = new Vue()
   }

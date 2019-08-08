@@ -10,8 +10,19 @@ export default {
       total: 0, // 当前页面显示的总数据,
       list: [], // 当前页面显示的数据列表
       listLoading: false, // 列表加载状态
+      btnLoading: false, // 按钮加载状态
       dialogFormVisible: false, // 编辑页是否显示
-      dialogStatus: '' // 编辑页显示状态[update,create,check]
+      dialogStatus: '' // 编辑页显示状态[create,check,modify]
+    }
+  },
+  computed: {
+    editTitle () {
+      const map = {
+        check: '查看',
+        modify: '编辑',
+        create: '新增'
+      }
+      return map[this.dialogStatus] || '标题'
     }
   },
   filters: {
@@ -50,6 +61,22 @@ export default {
         this.list = []
         this.listLoading = true
       }
+    },
+    // 3.打开编辑页面
+    _openEditPage (status) {
+      this.dialogStatus = status
+      this.dialogFormVisible = true
+    },
+    // 弹窗取消
+    handleCancel () {
+      this.$confirm({
+        title: '警告',
+        content: '此操作会清空已输入内容，是否继续？',
+        onOk: () => {
+          this.dialogFormVisible = false
+          this.$refs.form && this.$refs.form.resetFields()// 并清空
+        }
+      })
     },
     // 2.3 分页事件 hank 组件内部overwrite
     searchList () {

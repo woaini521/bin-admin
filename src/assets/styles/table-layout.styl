@@ -20,6 +20,7 @@
     }
   }
   .table-view {
+    position: relative;
     flex: 1;
     background: #fff;
     border-top-right-radius: 5px;
@@ -29,6 +30,17 @@
     }
     .table-inner {
       padding-top: 10px;
+    }
+
+    // table-view 抽屉覆盖
+    .bin-drawer-wrapper, .bin-drawer-wrapper.is-right .drawer-box {
+      position: absolute;
+    }
+    .bin-drawer-wrapper .drawer-box .header {
+      padding: 10px 20px;
+    }
+    .bin-drawer-wrapper .drawer-box .footer {
+      text-align: center;
     }
   }
 }

@@ -79,8 +79,9 @@ router.beforeEach((to, from, next) => {
                 next({ name: 'login', query: { redirect: to.fullPath } })
                 BinUI.LoadingBar.done()
               })
+            } else {
+              next({ name: 'login' })
             }
-            console.log(err)
           })
       }
     }
