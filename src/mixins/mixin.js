@@ -48,11 +48,8 @@ export default {
     }
   },
   methods: {
-    /**
-     * 一、mixin中公共方法都以下划线为前缀区分是自身还是公共方法
-     */
-    // 2.设置列表数据
-    _setListData (obj) {
+    // 设置列表数据
+    setListData (obj) {
       if (obj) {
         this.list = obj.list
         this.total = obj.total
@@ -62,8 +59,8 @@ export default {
         this.listLoading = true
       }
     },
-    // 3.打开编辑页面
-    _openEditPage (status) {
+    // 打开编辑页面
+    openEditPage (status) {
       this.dialogStatus = status
       this.dialogFormVisible = true
       this.$refs.form && this.$refs.form.resetFields()
@@ -78,22 +75,22 @@ export default {
         }
       })
     },
-    // 2.3 hank 组件内部overwrite
+    // 组件内部overwrite
     searchList () {
       console.error('searchList need overwrite (from mixin)')
     },
-    // 2.4 查询条件查询
+    // 查询条件查询
     handleFilter () {
       this.listQuery.page = 1
       this.searchList()
     },
-    // 2.1分页大小事件 */
+    // 分页大小事件 */
     handleSizeChange(size) {
       this.listQuery.page = 1
       this.listQuery.size = size
       this.searchList()
     },
-    // 2.2分页跳转事件 */
+    // 分页跳转事件 */
     handleCurrentChange(page) {
       this.listQuery.page = page
       this.searchList()

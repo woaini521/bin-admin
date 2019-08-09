@@ -269,17 +269,17 @@
       // 新增按钮事件
       handleCreate () {
         this.resetDept()
-        this._openEditPage('create')
+        this.openEditPage('create')
       },
       // 编辑事件
       handleModify (row) {
         this.depart = { ...row }
-        this._openEditPage('modify')
+        this.openEditPage('modify')
       },
       // 查看按钮事件
       handleCheck (row) {
         this.depart = { ...row }
-        this._openEditPage('check')
+        this.openEditPage('check')
       },
       // 弹窗提示是否启用禁用
       handleChangeStatus (row) {
@@ -383,10 +383,10 @@
       },
       // 查询所有部门列表
       searchList () {
-        this._setListData()
+        this.setListData()
         api.getDeptList(this.listQuery).then(response => {
           if (response.status === 200) {
-            this._setListData({
+            this.setListData({
               list: response.data.rows,
               total: response.data.total
             })
