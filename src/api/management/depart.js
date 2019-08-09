@@ -17,8 +17,9 @@ export function getDeptList (query) {
       size: query.size,
       page: query.page - 1,
       departName: query.departName,
-      delFlag: query.delFlag ? 'Y' : 'N',
-      parentId: query.parentId
+      delFlag: query.delFlag,
+      parentId: query.parentId,
+      sort: 'sortNum'
     }
   })
 }
@@ -54,6 +55,30 @@ export function modifyDept (depart) {
     remark: depart.remark
   }
   return request.post('/management/depart/modify', data)
+}
+
+/* 启用禁用部门信息 */
+export function changeDelFlag (depart) {
+  let data = [depart.id]
+  return request({
+    url: '/management/depart/changeDelFlag',
+    method: 'post',
+    data,
+    params: {
+      yn: depart.delFlag
+    }
+  })
+}
+
+/* 启用禁用部门信息 */
+export function removeDepart (depart) {
+  return request({
+    url: '/management/depart/remove',
+    method: 'post',
+    params: {
+      id: depart.id
+    }
+  })
 }
 
 /* 部门是否唯一 */

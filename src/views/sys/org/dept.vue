@@ -7,8 +7,9 @@
       <v-filter-item title="部门名称">
         <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="显示禁用">
-        <b-switch size="large" v-model="listQuery.delFlag">
+      <v-filter-item title="显示禁用" width="160px">
+        <b-switch size="large" v-model="listQuery.delFlag" true-value="Y" false-value="N"
+                  @on-change="handleFilter">
           <span slot="open">显示</span>
           <span slot="close">隐藏</span>
         </b-switch>
@@ -21,29 +22,49 @@
       <b-button type="primary" v-waves size="small" icon="ios-add" @click="handleCreate">新增</b-button>
     </template>
     <!--中央表格-->
-    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe>
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
       <template v-slot:departName="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.departName }}</a>
       </template>
       <!--状态-->
       <template v-slot:delFlag="scope">
-        <b-tag v-if="scope.row.delFlag==='N'" type="success">启用</b-tag>
-        <b-tag v-else type="danger">禁用</b-tag>
+        <b-tag v-if="scope.row.delFlag==='N'" type="primary" size="medium">启用</b-tag>
+        <b-tag v-else type="danger" size="medium">禁用</b-tag>
       </template>
+      <!--操作栏-->
       <template v-slot:action="scope">
-        <a href="" @click.stop.prevent="handleModify(scope.row)">编辑</a>
+        <b-button :disabled="canModify && scope.row.delFlag==='Y'"
+                  type="text" @click="handleModify(scope.row)" v-waves>
+          编辑
+        </b-button>
+        <!--有修改权限则显示启用禁用按钮-->
+        <template v-if="canModify">
+          <b-divider type="vertical"></b-divider>
+          <b-button type="text" @click="handleChangeStatus(scope.row)" v-waves
+                    :style="{color:scope.row.delFlag==='Y'?'green':'red'}">
+            {{ scope.row.delFlag==='Y'?'启用':'禁用' }}
+          </b-button>
+        </template>
+        <!--是否有删除键-->
+        <template v-if="canRemove && scope.row.delFlag==='Y'">
+          <b-divider type="vertical"></b-divider>
+          <b-button type="text" v-waves style="color:red;" @click="handleRemove(scope.row)">删除</b-button>
+        </template>
       </template>
     </b-table>
     <!--下方分页器-->
-    <b-page slot="pager" :total="total" show-sizer></b-page>
+    <b-page slot="pager" :total="total" show-sizer
+            @on-change="handleCurrentChange" @on-page-size-change="handleSizeChange"></b-page>
     <!--编辑抽屉-->
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
       <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
         <v-key-label label="部门名称" label-width="150px" is-half is-first>{{ depart.departName }}</v-key-label>
-        <v-key-label label="部门全称" is-half>{{ depart.fullName }}</v-key-label>
-        <v-key-label label="统一社会信用代码" label-width="150px" is-half is-first>{{ depart.unifiedCode }}</v-key-label>
         <v-key-label label="部门编码" is-half>{{ depart.departCode }}</v-key-label>
+        <v-key-label label="部门类型" label-width="150px" is-half is-first>{{ depart.departKind }}</v-key-label>
+        <v-key-label label="排序编号" is-half>{{ depart.sortNum }}</v-key-label>
+        <v-key-label label="统一社会信用代码" label-width="150px" is-half is-first>{{ depart.unifiedCode }}</v-key-label>
+        <v-key-label label="部门全称" is-half>{{ depart.fullName }}</v-key-label>
         <v-key-label label="备注" label-width="150px" is-bottom>{{ depart.remark }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
           <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
@@ -107,6 +128,9 @@
   import * as api from '../../../api/management/depart'
   import { verifyUnifiedCode } from '../../../utils/validate'
 
+  // 非空字段提示
+  const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
+
   export default {
     name: 'Dept',
     mixins: [commonMixin, permission],
@@ -137,26 +161,46 @@
           })
         }
       }
-      const validateUnified = (rule, value, callback) => {
+      const validateDepartKind = (rule, value, callback) => {
         if (value.length > 0) {
+          this.$refs.form && this.$refs.form.validateField('fullName')
+          this.$refs.form && this.$refs.form.validateField('unifiedCode')
+        }
+        callback()
+      }
+      const validateFullName = (rule, value, callback) => {
+        if (this.depart.departKind === '一般组织' && value.length === 0) {
+          callback(new Error('一般组织类型需要填写部门全称'))
+        } else {
+          callback()
+        }
+      }
+      const validateUnified = (rule, value, callback) => {
+        if (this.depart.departKind === '一般组织') {
+          if (value.length === 0) {
+            callback(new Error('一般组织必须填写此项'))
+          }
           if (value === '00000000000000000X') {
-            callback()
+            callback(new Error('一般组织不能填写此代码'))
+          }
+        }
+        if (value === '00000000000000000X' || value.length === 0) {
+          callback()
+        } else {
+          if (verifyUnifiedCode(value)) {
+            api.oneDeptUnified(this.depart)
+              .then(response => {
+                if (response.data.data === 0) {
+                  callback()
+                } else {
+                  callback(new Error('部门编码重复'))
+                }
+              })
+              .catch(() => {
+                callback(new Error('请求验证重复性出错'))
+              })
           } else {
-            if (verifyUnifiedCode(value)) {
-              api.oneDeptUnified(this.depart)
-                .then(response => {
-                  if (response.data.data === 0) {
-                    callback()
-                  } else {
-                    callback(new Error('部门编码重复'))
-                  }
-                })
-                .catch(() => {
-                  callback(new Error('请求验证重复性出错'))
-                })
-            } else {
-              callback(new Error('请输入正确的统一社会信用代码'))
-            }
+            callback(new Error('请输入正确的统一社会信用代码'))
           }
         }
       }
@@ -164,30 +208,36 @@
         listQuery: {
           departName: '',
           parentId: '',
-          delFlag: false
+          delFlag: 'N'
         },
         treeData: [],
         columns: [
+          {
+            title: '序号',
+            type: 'index',
+            width: 50,
+            align: 'center',
+            indexMethod: (row) => {
+              return this.listQuery.size * (this.listQuery.page - 1) + row._index + 1
+            }
+          },
           { title: '部门名称', slot: 'departName' },
-          { title: '统一社会信用代码', key: 'unifiedCode' },
+          { title: '部门编码', key: 'departCode', align: 'center' },
+          { title: '部门类型', key: 'departKind', width: 120, align: 'center' },
           { title: '部门全称', key: 'fullName' },
-          { title: '状态', slot: 'delFlag' },
-          { title: '操作', slot: 'action', width: 150, align: 'center' }
+          { title: '状态', slot: 'delFlag', width: 100, align: 'center' },
+          { title: '操作', slot: 'action', width: 180 }
         ],
         depart: null,
         ruleValidate: {
-          departName: [
-            { required: true, message: '部门名称不能为空', trigger: 'blur' },
-            { validator: validateDepartName, trigger: 'blur' }
+          departName: [requiredRule, { validator: validateDepartName, trigger: 'blur' }],
+          departCode: [requiredRule, { validator: validateDepartCode, trigger: 'blur' }],
+          departKind: [
+            { required: true, message: '必填项', trigger: 'change' },
+            { validator: validateDepartKind, trigger: 'change' }
           ],
-          departCode: [
-            { required: true, message: '部门编码不能为空', trigger: 'blur' },
-            { validator: validateDepartCode, trigger: 'blur' }
-          ],
-          unifiedCode: [
-            { required: true, message: '统一社会信用代码必填', trigger: 'blur' },
-            { validator: validateUnified, trigger: 'blur' }
-          ]
+          fullName: [{ validator: validateFullName, trigger: 'blur' }],
+          unifiedCode: [{ validator: validateUnified, trigger: 'blur' }]
         }
       }
     },
@@ -212,7 +262,8 @@
           page: 1,
           size: 10,
           departName: '',
-          delFlag: false
+          delFlag: 'N',
+          parentId: this.currentTreeNode ? this.currentTreeNode.id : ''
         }
       },
       // 新增按钮事件
@@ -230,6 +281,46 @@
         this.depart = { ...row }
         this._openEditPage('check')
       },
+      // 弹窗提示是否启用禁用
+      handleChangeStatus (row) {
+        let depart = { ...row }
+        depart.delFlag = depart.delFlag === 'N' ? 'Y' : 'N'
+        this.$confirm({
+          title: '警告',
+          content: `确认 [${depart.delFlag === 'N' ? '启用' : '禁用'}] 当前部门吗？`,
+          onOk: () => {
+            api.changeDelFlag(depart).then(res => {
+              if (res.data.code === '0') {
+                this.$message({ type: 'success', content: '操作成功' })
+                this.initTree()
+              } else {
+                this.$message({ type: 'danger', content: '操作失败' })
+              }
+            })
+          }
+        })
+      },
+      // 弹窗提示是否删除
+      handleRemove (row) {
+        let depart = { ...row }
+        this.$confirm({
+          title: '警告',
+          content: `确实要删除当前部门吗？`,
+          loading: true,
+          onOk: () => {
+            api.removeDepart(depart).then(res => {
+              if (res.data.code === '0') {
+                this.$message({ type: 'success', content: '操作成功' })
+                this.$modal.remove()
+                this.initTree()
+              } else {
+                this.$modal.remove()
+                this.$message({ type: 'danger', content: res.data.message })
+              }
+            })
+          }
+        })
+      },
       // 表单提交
       handleSubmit () {
         this.$refs.form.validate((valid) => {
@@ -246,12 +337,10 @@
                 this.$message({ type: 'error', content: res.data.message })
               }
             })
-            console.log(this.depart)
           }
         })
       },
       /* [数据接口] */
-      // tree:初始化树结构
       // 重置栏目对象
       resetDept () {
         this.depart = {
@@ -262,11 +351,12 @@
           departKind: '',
           regionId: '',
           sortNum: 0,
-          unifiedCode: '00000000000000000X',
+          unifiedCode: '',
           fullName: '',
           remark: ''
         }
       },
+      // tree:初始化树结构
       initTree () {
         this.treeData = []
         // 请求响应返回树结构
@@ -300,7 +390,6 @@
               list: response.data.rows,
               total: response.data.total
             })
-            console.log(this.list)
           }
         })
       }

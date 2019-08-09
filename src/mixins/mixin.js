@@ -66,25 +66,36 @@ export default {
     _openEditPage (status) {
       this.dialogStatus = status
       this.dialogFormVisible = true
+      this.$refs.form && this.$refs.form.resetFields()
     },
     // 弹窗取消
     handleCancel () {
       this.$confirm({
         title: '警告',
-        content: '此操作会清空已输入内容，是否继续？',
+        content: '此操作会清空当前操作，是否继续？',
         onOk: () => {
           this.dialogFormVisible = false
-          this.$refs.form && this.$refs.form.resetFields()// 并清空
         }
       })
     },
-    // 2.3 分页事件 hank 组件内部overwrite
+    // 2.3 hank 组件内部overwrite
     searchList () {
       console.error('searchList need overwrite (from mixin)')
     },
     // 2.4 查询条件查询
     handleFilter () {
       this.listQuery.page = 1
+      this.searchList()
+    },
+    // 2.1分页大小事件 */
+    handleSizeChange(size) {
+      this.listQuery.page = 1
+      this.listQuery.size = size
+      this.searchList()
+    },
+    // 2.2分页跳转事件 */
+    handleCurrentChange(page) {
+      this.listQuery.page = page
       this.searchList()
     }
   }

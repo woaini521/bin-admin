@@ -115,6 +115,8 @@
               this.$message({ content: `${util.timeFix()}，欢迎回来`, type: 'success' })
             }, 1000)
           })
+        } else {
+          this.$message({ content: '登录失败请检查服务器', type: 'danger' })
         }
       },
       // 登录失败
