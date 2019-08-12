@@ -1,7 +1,7 @@
 // 系统日志管理相关请求
 import request from '../api_request'
 
-/* 获取所有部门列表 */
+/* 获取所有列表 */
 export function getLogList (query) {
   return request.get('/management/log/search', {
     params: {

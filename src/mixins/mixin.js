@@ -19,7 +19,7 @@ export default {
     editTitle () {
       const map = {
         check: '查看',
-        modify: '编辑',
+        modify: '修改',
         create: '新增'
       }
       return map[this.dialogStatus] || '标题'

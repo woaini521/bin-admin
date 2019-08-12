@@ -3,7 +3,9 @@ import request from '../api_request'
 
 /* 获取部门树 */
 export function getDeptTree (departCode = 'top') {
-  return request.get('/management/depart/tree', {
+  return request({
+    url: '/management/depart/tree',
+    method: 'get',
     params: {
       departCode: departCode
     }
@@ -12,7 +14,9 @@ export function getDeptTree (departCode = 'top') {
 
 /* 获取所有部门列表 */
 export function getDeptList (query) {
-  return request.get('/management/depart/search', {
+  return request({
+    url: '/management/depart/search',
+    method: 'get',
     params: {
       size: query.size,
       page: query.page - 1,
@@ -37,7 +41,11 @@ export function createDept (depart) {
     fullName: depart.fullName,
     remark: depart.remark
   }
-  return request.post('/management/depart/create', data)
+  return request({
+    url: '/management/depart/create',
+    method: 'post',
+    data
+  })
 }
 
 /* 修改部门信息 */
@@ -54,7 +62,11 @@ export function modifyDept (depart) {
     fullName: depart.fullName,
     remark: depart.remark
   }
-  return request.post('/management/depart/modify', data)
+  return request({
+    url: '/management/depart/modify',
+    method: 'post',
+    data
+  })
 }
 
 /* 启用禁用部门信息 */
@@ -70,7 +82,7 @@ export function changeDelFlag (depart) {
   })
 }
 
-/* 启用禁用部门信息 */
+/* 删除部门信息 */
 export function removeDepart (depart) {
   return request({
     url: '/management/depart/remove',
@@ -81,9 +93,11 @@ export function removeDepart (depart) {
   })
 }
 
-/* 部门是否唯一 */
+/* 部门名称是否唯一 */
 export function oneDeptName (depart) {
-  return request.get('/management/depart/checkDepartName', {
+  return request({
+    url: '/management/depart/checkDepartName',
+    method: 'get',
     params: {
       id: depart.id || '',
       departName: depart.departName
@@ -91,9 +105,11 @@ export function oneDeptName (depart) {
   })
 }
 
-/* 部门是否唯一 */
+/* 部门编码是否唯一 */
 export function oneDeptCode (depart) {
-  return request.get('/management/depart/checkDepartCode', {
+  return request({
+    url: '/management/depart/checkDepartCode',
+    method: 'get',
     params: {
       id: depart.id || '',
       departCode: depart.departCode
@@ -101,9 +117,11 @@ export function oneDeptCode (depart) {
   })
 }
 
-/* 部门是否唯一 */
+/* 统一社会信用代码是否唯一 */
 export function oneDeptUnified (depart) {
-  return request.get('/management/depart/checkUnifiedCode', {
+  return request({
+    url: '/management/depart/checkUnifiedCode',
+    method: 'get',
     params: {
       id: depart.id || '',
       unifiedCode: depart.unifiedCode

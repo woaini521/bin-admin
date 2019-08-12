@@ -35,7 +35,7 @@
       <template v-slot:action="scope">
         <b-button :disabled="canModify && scope.row.delFlag==='Y'"
                   type="text" @click="handleModify(scope.row)" v-waves>
-          编辑
+          修改
         </b-button>
         <!--有修改权限则显示启用禁用按钮-->
         <template v-if="canModify">
@@ -165,8 +165,8 @@
         if (value.length > 0) {
           this.$refs.form && this.$refs.form.validateField('fullName')
           this.$refs.form && this.$refs.form.validateField('unifiedCode')
+          callback()
         }
-        callback()
       }
       const validateFullName = (rule, value, callback) => {
         if (this.depart.departKind === '一般组织' && value.length === 0) {
@@ -176,31 +176,34 @@
         }
       }
       const validateUnified = (rule, value, callback) => {
+        console.log(value)
         if (this.depart.departKind === '一般组织') {
           if (value.length === 0) {
             callback(new Error('一般组织必须填写此项'))
-          }
-          if (value === '00000000000000000X') {
+          } else if (value === '00000000000000000X') {
             callback(new Error('一般组织不能填写此代码'))
-          }
-        }
-        if (value === '00000000000000000X' || value.length === 0) {
-          callback()
-        } else {
-          if (verifyUnifiedCode(value)) {
-            api.oneDeptUnified(this.depart)
-              .then(response => {
-                if (response.data.data === 0) {
-                  callback()
-                } else {
-                  callback(new Error('部门编码重复'))
-                }
-              })
-              .catch(() => {
-                callback(new Error('请求验证重复性出错'))
-              })
           } else {
-            callback(new Error('请输入正确的统一社会信用代码'))
+            callback()
+          }
+        } else {
+          if (value === '00000000000000000X' || value.length === 0) {
+            callback()
+          } else {
+            if (verifyUnifiedCode(value)) {
+              api.oneDeptUnified(this.depart)
+                .then(response => {
+                  if (response.data.data === 0) {
+                    callback()
+                  } else {
+                    callback(new Error('部门编码重复'))
+                  }
+                })
+                .catch(() => {
+                  callback(new Error('请求验证重复性出错'))
+                })
+            } else {
+              callback(new Error('请输入正确的统一社会信用代码'))
+            }
           }
         }
       }
@@ -265,6 +268,7 @@
           delFlag: 'N',
           parentId: this.currentTreeNode ? this.currentTreeNode.id : ''
         }
+        this.handleFilter()
       },
       // 新增按钮事件
       handleCreate () {
@@ -273,7 +277,8 @@
       },
       // 编辑事件
       handleModify (row) {
-        this.depart = { ...row }
+        this.resetDept()
+        this.depart = { ...this.depart, ...row }
         this.openEditPage('modify')
       },
       // 查看按钮事件
@@ -332,7 +337,24 @@
                 this.btnLoading = false
                 this.dialogFormVisible = false
                 this.$message({ type: 'success', content: '操作成功' })
-                this.initTree()
+                this.searchList()
+              } else {
+                this.$message({ type: 'error', content: res.data.message })
+              }
+            })
+          }
+        })
+      },
+      handleSubmit2 () {
+        this.$refs.form.validate((valid) => {
+          if (valid) {
+            this.btnLoading = true
+            api.modifyDept(this.dict).then(res => {
+              if (res.data.code === '0') {
+                this.btnLoading = false
+                this.dialogFormVisible = false
+                this.$message({ type: 'success', content: '操作成功' })
+                this.searchList()
               } else {
                 this.$message({ type: 'error', content: res.data.message })
               }
