@@ -22,9 +22,9 @@
     <b-page slot="pager" :total="total" show-sizer
             @on-change="handleCurrentChange" @on-page-size-change="handleSizeChange"></b-page>
     <!--编辑抽屉-->
-    <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
+    <b-drawer v-model="dialogFormVisible" :append-to-body="false" width="800px" footer-hide :title="editTitle">
       <!--查询内容区域-->
-      <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
+      <div v-if="dialogStatus==='check'" style="padding: 20px;">
         <v-key-label label="操作名称">{{ current.operateName }}</v-key-label>
         <v-key-label label="模块名称">{{ current.moduleName }}</v-key-label>
         <v-key-label label="操作类型">{{ current.operateType }}</v-key-label>

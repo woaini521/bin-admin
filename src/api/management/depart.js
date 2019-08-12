@@ -14,17 +14,19 @@ export function getDeptTree (departCode = 'top') {
 
 /* 获取所有部门列表 */
 export function getDeptList (query) {
+  const data = new URLSearchParams()
+  data.append('size', query.size)
+  data.append('page', query.page - 1)
+  data.append('departName', query.departName)
+  data.append('delFlag', query.delFlag)
+  data.append('parentId', query.parentId)
+  data.append('sort', 'sortNum,asc')
+  data.append('sort', 'createDate,desc')
+  console.log(data)
   return request({
     url: '/management/depart/search',
     method: 'get',
-    params: {
-      size: query.size,
-      page: query.page - 1,
-      departName: query.departName,
-      delFlag: query.delFlag,
-      parentId: query.parentId,
-      sort: 'sortNum'
-    }
+    params: data
   })
 }
 
