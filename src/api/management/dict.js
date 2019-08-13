@@ -90,7 +90,6 @@ export function getItemList (query) {
   data.append('itemCode', query.itemCode)
   data.append('sort', 'sortNum,asc')
   data.append('sort', 'createDate,desc')
-  console.log(data)
   return request({
     url: '/management/dict/item/search',
     method: 'get',

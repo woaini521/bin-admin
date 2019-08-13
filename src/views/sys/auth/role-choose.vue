@@ -1,0 +1,64 @@
+<template>
+  <b-modal v-model="chooseDialog" title="选择角色">
+    <div style="min-height: 300px;">
+      <div flex="cross:center">
+        <span style="width: 70px;">角色名称</span>
+        <b-input v-model.trim="listQuery.name" size="small" placeholder="角色名称" clearable style="width: 280px;">
+          <b-icon name="ios-search" slot="suffix" @click.native="handleFilter" style="cursor: pointer;"></b-icon>
+        </b-input>
+      </div>
+      <b-divider align="left">角色列表</b-divider>
+      <b-button v-waves plain round @click="chooseOne({id:'',name:''})" type="info">无父角色</b-button>
+      <b-button v-for="item in list" :key="item.id" v-waves round plain
+                :type="item.roleType==='I'?'primary':'warning'"
+                @click="chooseOne(item)">{{item.name}}
+      </b-button>
+    </div>
+    <div slot="footer" style="text-align: center;">
+      <!--下方分页器-->
+      <b-page :total="total" size="small" @on-change="handleCurrentChange"></b-page>
+    </div>
+  </b-modal>
+</template>
+
+<script>
+  import commonMixin from '../../../mixins/mixin'
+  import permission from '../../../mixins/permission'
+  import * as api from '../../../api/management/role'
+
+  export default {
+    name: 'role-choose',
+    mixins: [commonMixin, permission],
+    data () {
+      return {
+        listQuery: {
+          name: ''
+        },
+        chooseDialog: false
+      }
+    },
+    methods: {
+      open () {
+        this.chooseDialog = true
+        this.searchList()
+      },
+      // 查询所有部门列表
+      searchList () {
+        this.setListData()
+        api.getRoleList(this.listQuery).then(response => {
+          if (response.status === 200) {
+            this.setListData({
+              list: response.data.rows,
+              total: response.data.total
+            })
+          }
+        })
+      },
+      // 选中一个角色
+      chooseOne (item) {
+        this.chooseDialog = false
+        this.$emit('on-choose', { id: item.id, name: item.name })
+      }
+    }
+  }
+</script>
