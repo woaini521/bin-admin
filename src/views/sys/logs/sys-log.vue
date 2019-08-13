@@ -93,7 +93,7 @@
         this.current = { ...row }
         this.openEditPage('check')
       },
-      // 查询所有部门列表
+      // 查询所有列表
       searchList () {
         this.setListData()
         api.getLogList(this.listQuery).then(response => {
@@ -102,7 +102,6 @@
               list: response.data.rows,
               total: response.data.total
             })
-            this.$print(this.list)
           }
         })
       }

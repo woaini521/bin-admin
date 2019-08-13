@@ -345,25 +345,8 @@
           }
         })
       },
-      handleSubmit2 () {
-        this.$refs.form.validate((valid) => {
-          if (valid) {
-            this.btnLoading = true
-            api.modifyDept(this.dict).then(res => {
-              if (res.data.code === '0') {
-                this.btnLoading = false
-                this.dialogFormVisible = false
-                this.$message({ type: 'success', content: '操作成功' })
-                this.searchList()
-              } else {
-                this.$message({ type: 'error', content: res.data.message })
-              }
-            })
-          }
-        })
-      },
       /* [数据接口] */
-      // 重置栏目对象
+      // 重置对象
       resetDept () {
         this.depart = {
           id: '',

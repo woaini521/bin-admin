@@ -2,11 +2,11 @@
   <v-table-layout>
     <!--查询条件-->
     <v-filter-bar slot="filter">
-      <v-filter-item title="字典名称">
-        <b-input v-model.trim="listQuery.groupName" size="small" placeholder="请输入字典名称" clearable></b-input>
+      <v-filter-item title="字典组名称">
+        <b-input v-model.trim="listQuery.groupName" size="small" placeholder="请输入字典组名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="字典编码">
-        <b-input v-model.trim="listQuery.groupCode" size="small" placeholder="请输入字典名称" clearable></b-input>
+      <v-filter-item title="字典组编码">
+        <b-input v-model.trim="listQuery.groupCode" size="small" placeholder="请输入字典组编码" clearable></b-input>
       </v-filter-item>
       <!--添加查询按钮位置-->
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
@@ -29,9 +29,9 @@
       </template>
       <!--操作栏-->
       <template v-slot:action="scope">
-        <b-button :disabled="canModify && scope.row.delFlag==='Y'"
-                  type="text" @click="handleModify(scope.row)" v-waves>修改
-        </b-button>
+        <b-button :disabled="!canModify" type="text" @click="handleDictItem(scope.row)" v-waves>字典项</b-button>
+        <b-divider type="vertical"></b-divider>
+        <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
         <!--是否有删除键-->
         <template v-if="canRemove">
           <b-divider type="vertical"></b-divider>
@@ -47,7 +47,6 @@
               :append-to-body="false" :mask-closable="false" width="500px" footer-hide>
       <!--增加编辑区域-->
       <div v-if="dialogStatus!=='check'" style="padding: 20px;">
-        <!--调试用，显示id-->
         <b-form :model="dict" ref="form" :rules="ruleValidate" label-position="top">
           <b-form-item label="字典编码" prop="groupCode">
             <b-input v-model="dict.groupCode" placeholder="请输入字典编码" clearable></b-input>
@@ -70,6 +69,8 @@
         </b-form>
       </div>
     </b-drawer>
+    <!--字典项弹窗-->
+    <dict-item ref="dictItem"></dict-item>
   </v-table-layout>
 </template>
 
@@ -77,11 +78,13 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/dict'
+  import DictItem from './dict-item'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 
   export default {
     name: 'Dict',
+    components: { DictItem },
     mixins: [commonMixin, permission],
     data () {
       const validateDictGroupCode = (rule, value, callback) => {
@@ -206,8 +209,12 @@
           }
         })
       },
+      // 弹出字典项编辑页
+      handleDictItem (row) {
+        this.$refs.dictItem && this.$refs.dictItem.open(row)
+      },
       /* [数据接口] */
-      // 重置栏目对象
+      // 重置对象
       resetDict () {
         this.dict = {
           id: '',
@@ -216,7 +223,7 @@
           dictType: 'EXT'
         }
       },
-      // 查询所有部门列表
+      // 查询所有列表
       searchList () {
         this.setListData()
         api.getDictGroupList(this.listQuery).then(response => {
