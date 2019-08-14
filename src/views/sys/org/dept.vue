@@ -22,7 +22,8 @@
       <b-button type="primary" v-waves size="small" icon="ios-add" @click="handleCreate">新增</b-button>
     </template>
     <!--中央表格-->
-    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
+             stripe max-height="526" ref="table" :width="treeTableWidth">
       <template v-slot:departName="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.departName }}</a>
       </template>
@@ -224,11 +225,10 @@
               return this.listQuery.size * (this.listQuery.page - 1) + row._index + 1
             }
           },
-          { title: '部门名称', slot: 'departName' },
-          { title: '部门编码', key: 'departCode', align: 'center' },
-          { title: '部门类型', key: 'departKind', width: 120, align: 'center' },
-          { title: '部门全称', key: 'fullName' },
-          { title: '状态', slot: 'delFlag', width: 100, align: 'center' },
+          { title: '类别名称', slot: 'departName' },
+          { title: '完整编码', key: 'departCode', align: 'center' },
+          { title: '类别编码', key: 'departKind', width: 120, align: 'center' },
+          { title: '排序编号', key: 'fullName' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         depart: null,

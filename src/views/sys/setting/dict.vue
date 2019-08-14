@@ -16,7 +16,8 @@
       <b-button type="primary" v-waves size="small" icon="ios-add" @click="handleCreate">新增</b-button>
     </template>
     <!--中央表格-->
-    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
+             stripe max-height="526" ref="table" :width="tableWidth">
       <!--字典类型-->
       <template v-slot:dictType="scope">
         <span v-if="scope.row.dictType==='SYS'" style="color: #1890ff;">系统字典</span>

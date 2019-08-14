@@ -1,6 +1,7 @@
 export default {
   data () {
     return {
+      tableWrapWidth: 0,
       currentTreeNode: null,
       filterOpened: false, // 查询列表是否打开
       listQuery: { // 查询通用条件,组件内部的可删除
@@ -23,7 +24,18 @@ export default {
         create: '新增'
       }
       return map[this.dialogStatus] || '标题'
+    },
+    tableWidth () {
+      // 没有树结构的表格宽度= wrap -15*2 - 20*2
+      return this.tableWrapWidth - 70
+    },
+    treeTableWidth () {
+      // 包含树结构的表格宽度= wrap -15*2 - 20*2 -200
+      return this.tableWrapWidth - 270
     }
+  },
+  mounted () {
+    this.$EventBus.$on('/layout/resize', this._resizeTable)
   },
   filters: {
     statusFilter (status) {
@@ -48,6 +60,12 @@ export default {
     }
   },
   methods: {
+    // 1.监听窗口变化重置表格最大高度
+    _resizeTable (width) {
+      this.tableWrapWidth = width
+      this.$refs.table && this.$refs.table.handleResize()
+      // console.log(this.$refs.table)
+    },
     // 设置列表数据
     setListData (obj) {
       if (obj) {
@@ -85,13 +103,13 @@ export default {
       this.searchList()
     },
     // 分页大小事件 */
-    handleSizeChange(size) {
+    handleSizeChange (size) {
       this.listQuery.page = 1
       this.listQuery.size = size
       this.searchList()
     },
     // 分页跳转事件 */
-    handleCurrentChange(page) {
+    handleCurrentChange (page) {
       this.listQuery.page = page
       this.searchList()
     }

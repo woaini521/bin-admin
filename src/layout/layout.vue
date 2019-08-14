@@ -21,8 +21,8 @@
       </global-header>
       <!--标签栏-->
       <tags-view></tags-view>
-      <div class="app-main">
-        <transition name="fade-transverse" mode="out-in">
+      <div class="app-main" ref="contentWrapper">
+        <transition name="fade-transverse" mode="out-in" @enter="enter">
           <keep-alive :include="cachedViews">
             <router-view :key="key"></router-view>
           </keep-alive>
@@ -62,6 +62,32 @@
         },
         immediate: true
       }
+    },
+    mounted () {
+      this.wrap = this.$refs.contentWrapper
+      if (this.wrap) {
+        this.$nextTick(() => {
+          this.calcTableWidth()
+        })
+        this.__resizeHandler = this.$util.throttle(() => {
+          this.calcTableWidth()
+        }, 50)
+        window.addEventListener('resize', this.__resizeHandler)
+      }
+    },
+    methods: {
+      calcTableWidth () {
+        let width = this.wrap ? this.wrap.clientWidth : 800
+        // 全局通信，这里不缓存至vuex中，用于传递当前app-main宽度, mixin中监听此方法用于统一窗口宽度
+        this.$EventBus.$emit('/layout/resize', width)
+      },
+      enter: function (el) {
+        // 再次计算一次宽度
+        this.calcTableWidth()
+      }
+    },
+    beforeDestroy () {
+      window.removeEventListener('resize', this.__resizeHandler)
     },
     components: {
       GlobalHeader,

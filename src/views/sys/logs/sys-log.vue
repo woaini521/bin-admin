@@ -12,7 +12,8 @@
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
     </v-filter-bar>
     <!--中央表格-->
-    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
+             stripe max-height="526" ref="table" :width="tableWidth">
       <!--操作栏-->
       <template v-slot:action="scope">
         <b-button type="text" v-waves @click="handleCheck(scope.row)">查看</b-button>

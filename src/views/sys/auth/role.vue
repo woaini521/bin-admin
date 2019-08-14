@@ -13,7 +13,8 @@
       <b-button type="primary" v-waves size="small" icon="ios-add" @click="handleCreate">新增</b-button>
     </template>
     <!--中央表格-->
-    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
+    <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
+             stripe max-height="526" ref="table" :width="tableWidth">
       <template v-slot:name="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.name }}</a>
       </template>

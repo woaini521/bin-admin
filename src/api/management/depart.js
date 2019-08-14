@@ -22,7 +22,6 @@ export function getDeptList (query) {
   data.append('parentId', query.parentId)
   data.append('sort', 'sortNum,asc')
   data.append('sort', 'createDate,desc')
-  console.log(data)
   return request({
     url: '/management/depart/search',
     method: 'get',

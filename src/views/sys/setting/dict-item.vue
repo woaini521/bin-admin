@@ -20,7 +20,8 @@
         <b-button type="primary" v-waves size="small" icon="ios-add" @click="handleCreate">新增</b-button>
       </template>
       <!--中央表格-->
-      <b-table slot="table" :columns="columns" :data="list" :loading="listLoading" stripe max-height="526">
+      <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
+               stripe max-height="526" ref="table" :width="tableWidth">
         <!--操作栏-->
         <template v-slot:action="scope">
           <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
