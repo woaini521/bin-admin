@@ -64,7 +64,6 @@ export default {
     _resizeTable (width) {
       this.tableWrapWidth = width
       this.$refs.table && this.$refs.table.handleResize()
-      // console.log(this.$refs.table)
     },
     // 设置列表数据
     setListData (obj) {
