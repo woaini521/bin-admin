@@ -22,6 +22,10 @@
         <b-tag v-if="scope.row.roleType==='I'" type="primary">系统内置</b-tag>
         <b-tag v-else type="warning">系统创建</b-tag>
       </template>
+      <!--角色授权栏-->
+      <template v-slot:auth="scope">
+        <b-button @click="handleRoleAuth(scope.row)" v-waves type="text" style="color:#1890ff;">编辑权限</b-button>
+      </template>
       <!--操作栏-->
       <template v-slot:action="scope">
         <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
@@ -84,7 +88,10 @@
         </b-form>
       </div>
     </b-drawer>
+    <!--角色选择弹窗-->
     <role-choose ref="roleChoose" @on-choose="handleChooseOne"></role-choose>
+    <!--角色授权抽屉-->
+    <role-auth ref="roleAuth"></role-auth>
   </v-table-layout>
 </template>
 
@@ -93,12 +100,13 @@
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/role'
   import RoleChoose from './role-choose'
+  import RoleAuth from './role-auth'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 
   export default {
     name: 'Role',
-    components: { RoleChoose },
+    components: { RoleAuth, RoleChoose },
     mixins: [commonMixin, permission],
     data () {
       const validateName = (rule, value, callback) => {
@@ -147,6 +155,7 @@
           { title: '父角色名称', key: 'parentName' },
           { title: '角色类型', slot: 'roleType' },
           { title: '描述', key: 'desc' },
+          { title: '角色授权', slot: 'auth' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         role: null,
@@ -235,6 +244,12 @@
         // 获取选中角色并填充父角色id和名称
         this.role.parentId = one.id
         this.role.parentName = one.name
+      },
+      // 弹窗角色授权
+      handleRoleAuth (row) {
+        this.resetRole()
+        this.role = { ...this.role, ...row }
+        this.$refs.roleAuth && this.$refs.roleAuth.open(this.role)
       },
       /* [数据接口] */
       // 重置角色对象
