@@ -41,11 +41,10 @@
         return style
       },
       labelStyle () {
-        let style = {
+        return {
           width: this.labelWidth,
           textAlign: this.labelPosition
         }
-        return style
       }
     }
   }

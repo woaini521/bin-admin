@@ -1,4 +1,4 @@
-// 部门管理相关请求
+// 参数类型
 import request from '../api_request'
 
 /* 获取参数类型树 */

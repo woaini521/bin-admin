@@ -182,7 +182,6 @@
       handleModify (row) {
         this.resetType()
         this.type = { ...this.type, ...row }
-        console.log(this.type)
         this.openEditPage('modify')
       },
       // 查看按钮事件
