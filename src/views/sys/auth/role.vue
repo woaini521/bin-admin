@@ -19,8 +19,8 @@
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.name }}</a>
       </template>
       <template v-slot:roleType="scope">
-        <b-tag v-if="scope.row.roleType==='I'" type="primary">系统内置</b-tag>
-        <b-tag v-else type="warning">系统创建</b-tag>
+        <b-tag v-if="scope.row.roleType===ENUM.IN" type="primary">{{ roleTypeMap[scope.row.roleType] }}</b-tag>
+        <b-tag v-else type="warning">{{ roleTypeMap[scope.row.roleType] }}</b-tag>
       </template>
       <!--角色授权栏-->
       <template v-slot:auth="scope">
@@ -30,7 +30,7 @@
       <template v-slot:action="scope">
         <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
         <!--是否有删除键-->
-        <template v-if="canRemove && scope.row.roleType==='S'">
+        <template v-if="canRemove && scope.row.roleType===ENUM.SYS">
           <b-divider type="vertical"></b-divider>
           <b-button type="text" v-waves style="color:red;" @click="handleRemove(scope.row)">删除</b-button>
         </template>
@@ -46,7 +46,7 @@
       <div v-if="dialogStatus==='check'" style="padding: 20px;">
         <v-key-label label="角色名称">{{ role.name }}</v-key-label>
         <v-key-label label="角色编码">{{ role.code }}</v-key-label>
-        <v-key-label label="角色类型">{{ role.roleType==='I'?'系统角色':'扩展角色' }}</v-key-label>
+        <v-key-label label="角色类型">{{ roleTypeMap[role.roleType] }}</v-key-label>
         <v-key-label label="父级角色名称">{{ role.parentName }}</v-key-label>
         <v-key-label label="描述" is-bottom>{{ role.desc }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
@@ -63,16 +63,17 @@
           </b-form-item>
           <div flex="box:mean">
             <b-form-item label="父角色">
-              <b-input :value="role.parentName" readonly size="small" class="choose-btn">
-                <b-button slot="suffix" size="small" type="primary" v-waves @click="handleShowDialogChoose">
+              <b-input :value="role.parentName" readonly class="choose-btn">
+                <b-button slot="suffix" type="primary" v-waves @click="handleShowDialogChoose">
                   选择
                 </b-button>
               </b-input>
             </b-form-item>
             <b-form-item label="角色类型" prop="roleType">
-              <b-select v-model="role.roleType" placeholder="请选择角色类型">
-                <b-option value="I">系统内置</b-option>
-                <b-option value="S">系统创建</b-option>
+              <b-select v-model="role.roleType" placeholder="请选择角色类型" size="large">
+                <b-option v-for="item in roleTypeOptions" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </b-option>
               </b-select>
             </b-form-item>
           </div>
@@ -98,6 +99,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
+  import { getRoleType } from '../../../api/enum'
   import * as api from '../../../api/management/role'
   import RoleChoose from './role-choose'
   import RoleAuth from './role-auth'
@@ -111,7 +113,6 @@
     data () {
       const validateName = (rule, value, callback) => {
         if (value.length > 0) {
-          console.log(this.role)
           api.oneRoleName(this.role).then(response => {
             if (response.data.data === 0) {
               callback()
@@ -163,10 +164,24 @@
           name: [requiredRule, { validator: validateName, trigger: 'blur' }],
           code: [requiredRule, { validator: validateCode, trigger: 'blur' }],
           desc: [requiredRule]
-        }
+        },
+        roleTypeMap: { 'S': '系统创建', 'I': '内置角色' }
+      }
+    },
+    computed: {
+      roleTypeOptions () {
+        let ret = []
+        Object.keys(this.roleTypeMap).forEach(key => {
+          ret.push({ value: key, label: this.roleTypeMap[key] })
+        })
+        return ret
+      },
+      ENUM () {
+        return { SYS: 'S', IN: 'I' } // 常量比对键值对
       }
     },
     created () {
+      this.getRoleTypeEnum()
       this.resetRole()
       this.searchList()
     },
@@ -252,6 +267,14 @@
         this.$refs.roleAuth && this.$refs.roleAuth.open(this.role)
       },
       /* [数据接口] */
+      // 通用枚举
+      getRoleTypeEnum () {
+        getRoleType().then(res => {
+          if (res.status === 200) {
+            this.roleTypeMap = res.data.data
+          }
+        })
+      },
       // 重置角色对象
       resetRole () {
         this.role = {

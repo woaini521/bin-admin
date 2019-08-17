@@ -26,7 +26,7 @@
       <!--取值模式-->
       <template v-slot:valueMode="scope">
         <b-tag :type="scope.row.valueMode|valueModeStyleFilter" size="medium">
-          {{ scope.row.valueMode | valueModeFilter}}
+          {{ valueModeMap[scope.row.valueMode] }}
         </b-tag>
       </template>
       <!--操作栏-->
@@ -52,7 +52,7 @@
         <v-key-label label="参数名称" is-half>{{ conf.confName }}</v-key-label>
         <v-key-label label="参数编码" is-half is-first>{{ conf.confCode }}</v-key-label>
         <v-key-label label="完整编码" is-half>{{ conf.routeCode }}</v-key-label>
-        <v-key-label label="取值模式" is-half is-first>{{ conf.valueMode | valueModeFilter }}</v-key-label>
+        <v-key-label label="取值模式" is-half is-first>{{ valueModeMap[conf.valueMode] }}</v-key-label>
         <v-key-label label="排序编号" is-half>{{ conf.sortNum }}</v-key-label>
         <v-key-label label="当前值" is-half is-first>{{ conf.confValue }}</v-key-label>
         <v-key-label label="内部值" is-half>{{ conf.realValue }}</v-key-label>
@@ -85,9 +85,9 @@
           <div flex="box:mean">
             <b-form-item label="取值模式" prop="valueMode" class="bin-form-item-required">
               <b-select v-model="conf.valueMode" size="large">
-                <b-option value="1">字符串</b-option>
-                <b-option value="2">内部单选</b-option>
-                <b-option value="3">内部多选</b-option>
+                <b-option v-for="item in valueModeOptions" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </b-option>
               </b-select>
             </b-form-item>
             <b-form-item label="排序编号" prop="sortNum">
@@ -97,8 +97,8 @@
           <b-form-item label="描述" prop="desc">
             <b-input v-model="conf.desc" placeholder="请输入描述" type="textarea"></b-input>
           </b-form-item>
-          <template v-if="conf.valueMode!=='1'">
-            <b-divider align="left">{{ conf.valueMode|valueModeFilter }}</b-divider>
+          <template v-if="conf.valueMode!==ENUM.STRING">
+            <b-divider align="left">{{ valueModeMap[conf.valueMode] }}</b-divider>
             <!--遍历值缓存-->
             <div flex="box:last" v-for="(item,index) in conf.bufferValue" :key="index">
               <b-form-item label="显示值">
@@ -136,7 +136,7 @@
           <span>参数类型：</span>
           <span>
             <b-tag :type="conf.valueMode|valueModeStyleFilter">
-              {{ conf.valueMode | valueModeFilter}}
+              {{ valueModeMap[conf.valueMode]}}
             </b-tag>
           </span>
         </div>
@@ -159,9 +159,9 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
+  import { getValueMode } from '../../../api/enum'
   import * as api from '../../../api/management/paramConf'
   import ParamConf from './param-conf'
-
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
   export default {
@@ -226,22 +226,32 @@
           confCode: [requiredRule, { validator: validateConfCode, trigger: 'blur' }]
         },
         settingVisible: false,
-        checkboxList: []
+        checkboxList: [],
+        valueModeMap: { '1': '字符串', '2': '内部单选', '3': '内部多选' } // 默认值
       }
     },
     filters: {
-      valueModeFilter (value) {
-        let map = { '1': '字符串', '2': '内部单选', '3': '内部多选' }
-        return map[value]
-      },
       valueModeStyleFilter (value) {
         let map = { '1': 'info', '2': 'primary', '3': 'success' }
         return map[value]
       }
     },
+    computed: {
+      valueModeOptions () {
+        let ret = []
+        Object.keys(this.valueModeMap).forEach(key => {
+          ret.push({ value: key, label: this.valueModeMap[key] })
+        })
+        return ret
+      },
+      ENUM () {
+        return { STRING: '1', RADIO: '2', CHECKBOX: '3' }
+      }
+    },
     created () {
-      this.initTree()
+      this.getValueModeEnum()
       this.resetConf()
+      this.initTree()
     },
     methods: {
       /* [事件响应] */
@@ -287,15 +297,19 @@
       // 保存配置
       confSave () {
         // 如果是字符串模式，则参数值需要同步至内部值
-        if (this.conf.valueMode === '1') {
-          this.conf.confValue = this.conf.realValue
-        } else if (this.conf.valueMode === '2') {
-          const choose = this.conf.bufferValue.find(item => item.value === this.conf.realValue)
-          this.conf.confValue = choose.label
-        } else {
-          this.conf.confValue = this.conf.bufferValue
-            .filter(item => this.conf.realValue.includes(item.value))
-            .map(item => item.label).join(',')
+        switch (this.conf.valueMode) {
+          case this.ENUM.STRING:
+            this.conf.confValue = this.conf.realValue
+            break
+          case this.ENUM.RADIO:
+            const choose = this.conf.bufferValue.find(item => item.value === this.conf.realValue)
+            this.conf.confValue = choose.label
+            break
+          case this.ENUM.CHECKBOX:
+            this.conf.confValue = this.conf.bufferValue
+              .filter(item => this.conf.realValue.includes(item.value))
+              .map(item => item.label).join(',')
+            break
         }
         this.btnLoading = true
         api.setConf(this.conf).then(res => {
@@ -402,6 +416,14 @@
         }
       },
       /* [数据接口] */
+      // 通用枚举
+      getValueModeEnum () {
+        getValueMode().then(res => {
+          if (res.status === 200) {
+            this.valueModeMap = res.data.data
+          }
+        })
+      },
       // 重置对象
       resetConf () {
         this.conf = {
@@ -411,7 +433,7 @@
           confCode: '',
           confValue: '', // 参数值，即当前值，存储显示值，字符串时需要同步显示值和实际值
           realValue: '', // 内部值,及实际存储数据库中的值，字符串模式时需要同步至实际值
-          valueMode: '1', // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
+          valueMode: this.ENUM.STRING, // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
           valueRange: '', // 取值范围，及显示值
           realValueRange: '', // 内部值，及value实际值
           sortNum: 0,

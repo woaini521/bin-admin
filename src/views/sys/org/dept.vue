@@ -8,7 +8,7 @@
         <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
       </v-filter-item>
       <v-filter-item title="显示禁用" width="160px">
-        <b-switch size="large" v-model="listQuery.delFlag" true-value="Y" false-value="N"
+        <b-switch size="large" v-model="listQuery.delFlag" :true-value="ENUM.Y" :false-value="ENUM.N"
                   @on-change="handleFilter">
           <span slot="open">显示</span>
           <span slot="close">隐藏</span>
@@ -29,25 +29,22 @@
       </template>
       <!--状态-->
       <template v-slot:delFlag="scope">
-        <b-tag v-if="scope.row.delFlag==='N'" type="primary" size="medium">启用</b-tag>
-        <b-tag v-else type="danger" size="medium">禁用</b-tag>
+        <b-switch v-model="scope.row.delFlag" :true-value="ENUM.N" :false-value="ENUM.Y"
+                  inactive-color="#ff4949" size="large"
+                  @on-change="handleChangeDelFlag(scope.row)">
+          <span slot="open">启用</span>
+          <span slot="close">禁用</span>
+        </b-switch>
       </template>
       <!--操作栏-->
       <template v-slot:action="scope">
-        <b-button :disabled="canModify && scope.row.delFlag==='Y'"
+        <!--如果可编辑且是禁用（可删除即为禁用）状态下不可编辑-->
+        <b-button :disabled="canModify && scope.row.delFlag===ENUM.Y"
                   type="text" @click="handleModify(scope.row)" v-waves>
           修改
         </b-button>
-        <!--有修改权限则显示启用禁用按钮-->
-        <template v-if="canModify">
-          <b-divider type="vertical"></b-divider>
-          <b-button type="text" @click="handleChangeStatus(scope.row)" v-waves
-                    :style="{color:scope.row.delFlag==='Y'?'green':'red'}">
-            {{ scope.row.delFlag==='Y'?'启用':'禁用' }}
-          </b-button>
-        </template>
         <!--是否有删除键-->
-        <template v-if="canRemove && scope.row.delFlag==='Y'">
+        <template v-if="canRemove && scope.row.delFlag===ENUM.Y">
           <b-divider type="vertical"></b-divider>
           <b-button type="text" v-waves style="color:red;" @click="handleRemove(scope.row)">删除</b-button>
         </template>
@@ -102,6 +99,7 @@
           <div flex="box:mean">
             <b-form-item label="部门类型" prop="departKind">
               <b-select v-model="depart.departKind">
+                <!--这里暂时是直接存储字符串值到后台，故不是key-value枚举值-->
                 <b-option value="机构">机构</b-option>
                 <b-option value="一般组织">一般组织</b-option>
               </b-select>
@@ -127,6 +125,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/depart'
+  import { getYn } from '../../../api/enum'
   import { verifyUnifiedCode } from '../../../utils/validate'
 
   // 非空字段提示
@@ -170,7 +169,7 @@
         }
       }
       const validateFullName = (rule, value, callback) => {
-        if (this.depart.departKind === '一般组织' && value.length === 0) {
+        if (this.depart.departKind === this.ENUM.COMMON && value.length === 0) {
           callback(new Error('一般组织类型需要填写部门全称'))
         } else {
           callback()
@@ -178,7 +177,7 @@
       }
       const validateUnified = (rule, value, callback) => {
         console.log(value)
-        if (this.depart.departKind === '一般组织') {
+        if (this.depart.departKind === this.ENUM.COMMON) {
           if (value.length === 0) {
             callback(new Error('一般组织必须填写此项'))
           } else if (value === '00000000000000000X') {
@@ -212,7 +211,7 @@
         listQuery: {
           departName: '',
           parentId: '',
-          delFlag: 'N'
+          delFlag: ''
         },
         treeData: [],
         columns: [
@@ -226,9 +225,11 @@
             }
           },
           { title: '类别名称', slot: 'departName' },
-          { title: '完整编码', key: 'departCode', align: 'center' },
-          { title: '类别编码', key: 'departKind', width: 120, align: 'center' },
-          { title: '排序编号', key: 'fullName' },
+          { title: '完整编码', key: 'departCode' },
+          { title: '部门类型', key: 'departKind', width: 120, align: 'center' },
+          { title: '部门全称', key: 'fullName' },
+          { title: '排序编号', key: 'sortNum', width: 80, align: 'center' },
+          { title: '状态', slot: 'delFlag', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         depart: null,
@@ -241,12 +242,26 @@
           ],
           fullName: [{ validator: validateFullName, trigger: 'blur' }],
           unifiedCode: [{ validator: validateUnified, trigger: 'blur' }]
-        }
+        },
+        ynMap: { 'N': '否', 'Y': '是' } // 默认值这里Y是可以删除，可删除状态及为禁用
+      }
+    },
+    computed: {
+      valueModeOptions () {
+        let ret = []
+        Object.keys(this.valueModeMap).forEach(key => {
+          ret.push({ value: key, label: this.valueModeMap[key] })
+        })
+        return ret
+      },
+      ENUM () {
+        return { N: 'N', Y: 'Y', ORG: '机构', COMMON: '一般组织' } // 常量比对键值对
       }
     },
     created () {
-      this.initTree()
+      this.getYnEnum()
       this.resetDept()
+      this.initTree()
     },
     methods: {
       /* [事件响应] */
@@ -265,7 +280,7 @@
           page: 1,
           size: 10,
           departName: '',
-          delFlag: 'N',
+          delFlag: this.ENUM.N,
           parentId: this.currentTreeNode ? this.currentTreeNode.id : ''
         }
         this.handleFilter()
@@ -286,22 +301,15 @@
         this.depart = { ...row }
         this.openEditPage('check')
       },
-      // 弹窗提示是否启用禁用
-      handleChangeStatus (row) {
+      // 单个启用禁用
+      handleChangeDelFlag (row) {
         let depart = { ...row }
-        depart.delFlag = depart.delFlag === 'N' ? 'Y' : 'N'
-        this.$confirm({
-          title: '警告',
-          content: `确认 [${depart.delFlag === 'N' ? '启用' : '禁用'}] 当前部门吗？`,
-          onOk: () => {
-            api.changeDelFlag(depart).then(res => {
-              if (res.data.code === '0') {
-                this.$message({ type: 'success', content: '操作成功' })
-                this.initTree()
-              } else {
-                this.$message({ type: 'danger', content: '操作失败' })
-              }
-            })
+        api.changeDelFlag(depart).then(res => {
+          if (res.data.code === '0') {
+            this.$message({ type: 'success', content: '操作成功' })
+            this.initTree()
+          } else {
+            this.$message({ type: 'danger', content: '操作失败' })
           }
         })
       },
@@ -346,6 +354,14 @@
         })
       },
       /* [数据接口] */
+      // 通用枚举
+      getYnEnum () {
+        getYn().then(res => {
+          if (res.status === 200) {
+            this.ynMap = res.data.data
+          }
+        })
+      },
       // 重置对象
       resetDept () {
         this.depart = {
@@ -382,7 +398,7 @@
             // 这里要注意，扩展响应式属性需要这么写
             this.$set(this.treeData[0], 'selected', true)
             this.$set(this.treeData[0], 'expand', true)
-            this.searchList()
+            this.resetQuery()
           }
         })
       },

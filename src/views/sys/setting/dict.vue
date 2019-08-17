@@ -20,8 +20,8 @@
              stripe max-height="526" ref="table" :width="tableWidth">
       <!--字典类型-->
       <template v-slot:dictType="scope">
-        <span v-if="scope.row.dictType==='SYS'" style="color: #1890ff;">系统字典</span>
-        <span v-else style="color: #ff9600;">扩展字典</span>
+        <span v-if="scope.row.dictType===ENUM.SYS" style="color: #1890ff;">{{ dictTypeMap[scope.row.dictType] }}</span>
+        <span v-else style="color: #ff9600;">{{ dictTypeMap[scope.row.dictType] }}</span>
       </template>
       <!--状态-->
       <template v-slot:delFlag="scope">
@@ -56,9 +56,10 @@
             <b-input v-model="dict.groupName" placeholder="请输入字典名称" clearable></b-input>
           </b-form-item>
           <b-form-item label="字典类型" prop="dictType">
-            <b-select v-model="dict.dictType">
-              <b-option value="SYS">系统字典</b-option>
-              <b-option value="EXT">扩展字典</b-option>
+            <b-select v-model="dict.dictType" size="large">
+              <b-option v-for="item in dictTypeOptions" :key="item.value" :value="item.value">
+                {{ item.label }}
+              </b-option>
             </b-select>
           </b-form-item>
           <b-form-item>
@@ -79,6 +80,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/dict'
+  import { getDictType } from '../../../api/enum'
   import DictItem from './dict-item'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
@@ -139,12 +141,26 @@
         ruleValidate: {
           groupCode: [requiredRule, { validator: validateDictGroupCode, trigger: 'blur' }],
           groupName: [requiredRule, { validator: validateDictGroupName, trigger: 'blur' }]
-        }
+        },
+        dictTypeMap: { 'SYS': '系统字典', 'EXT': '内部单选' } // 默认值
+      }
+    },
+    computed: {
+      dictTypeOptions () {
+        let ret = []
+        Object.keys(this.dictTypeMap).forEach(key => {
+          ret.push({ value: key, label: this.dictTypeMap[key] })
+        })
+        return ret
+      },
+      ENUM () {
+        return { SYS: 'SYS', EXT: 'EXT' } // 常量比对键值对
       }
     },
     created () {
-      this.searchList()
+      this.getDictTypeEnum()
       this.resetDict()
+      this.searchList()
     },
     methods: {
       /* [事件响应] */
@@ -172,7 +188,6 @@
       // 弹窗提示是否删除
       handleRemove (row) {
         let dict = { ...row }
-        console.log(dict)
         this.$confirm({
           title: '警告',
           content: `确实要删除当前字典组吗？`,
@@ -215,13 +230,22 @@
         this.$refs.dictItem && this.$refs.dictItem.open(row)
       },
       /* [数据接口] */
+      // 通用枚举
+      getDictTypeEnum () {
+        getDictType().then(res => {
+          if (res.status === 200) {
+            this.dictTypeMap = res.data.data
+            console.log(this.dictTypeMap)
+          }
+        })
+      },
       // 重置对象
       resetDict () {
         this.dict = {
           id: '',
           groupCode: '',
           groupName: '',
-          dictType: 'EXT'
+          dictType: this.ENUM.EXT
         }
       },
       // 查询所有列表
