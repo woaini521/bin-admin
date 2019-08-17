@@ -37,28 +37,6 @@ export default {
   mounted () {
     this.$EventBus.$on('/layout/resize', this._resizeTable)
   },
-  filters: {
-    statusFilter (status) {
-      const map = {
-        ENABLED: '启用',
-        DISABLED: '禁用'
-      }
-      return map[status]
-    },
-    statusStyleFilter (status) {
-      const map = {
-        ENABLED: 'success',
-        DISABLED: 'danger',
-        HIDDEN: 'warning',
-        DELETED: 'danger',
-        DRAFT: 'info',
-        PUBLISHED: 'success',
-        Y: 'success',
-        N: 'danger'
-      }
-      return map[status]
-    }
-  },
   methods: {
     // 1.监听窗口变化重置表格最大高度
     _resizeTable (width) {

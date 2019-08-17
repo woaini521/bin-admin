@@ -12,7 +12,7 @@ export function getTypeTree (typeCode) {
   })
 }
 
-/* 获取所有类别列表 */
+/* 获取所有参数设置列表 */
 export function getConfList (query) {
   return request({
     url: '/management/conf/search',
@@ -28,13 +28,13 @@ export function getConfList (query) {
   })
 }
 
-/* 新增类别信息 */
+/* 新增参数设置 */
 export function createConf (conf) {
   return request({
     url: '/management/conf/create',
     method: 'post',
     data: {
-      typeId: conf.parentId,
+      typeId: conf.typeId,
       confName: conf.confName,
       confCode: conf.confCode,
       confValue: conf.confValue,
@@ -48,14 +48,14 @@ export function createConf (conf) {
   })
 }
 
-/* 修改类别信息 */
+/* 修改参数设置 */
 export function modifyConf (conf) {
   return request({
     url: '/management/conf/modify',
     method: 'post',
     data: {
       id: conf.id,
-      typeId: conf.parentId,
+      typeId: conf.typeId,
       confName: conf.confName,
       confCode: conf.confCode,
       confValue: conf.confValue,
@@ -69,7 +69,20 @@ export function modifyConf (conf) {
   })
 }
 
-/* 删除类别 */
+/* 参数设置 */
+export function setConf (conf) {
+  return request({
+    url: '/management/conf/modify',
+    method: 'post',
+    data: {
+      id: conf.id,
+      confValue: conf.confValue,
+      realValue: conf.realValue
+    }
+  })
+}
+
+/* 删除参数设置 */
 export function removeConf (conf) {
   return request({
     url: '/management/conf/remove',

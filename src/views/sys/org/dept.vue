@@ -111,7 +111,7 @@
             </b-form-item>
           </div>
           <b-form-item label="备注" prop="remark">
-            <b-input v-model="depart.remark" placeholder="请输入备注" clearable type="textarea"></b-input>
+            <b-input v-model="depart.remark" placeholder="请输入备注" type="textarea"></b-input>
           </b-form-item>
           <b-form-item>
             <b-button type="primary" v-waves @click="handleSubmit" :loading="btnLoading">确 定</b-button>

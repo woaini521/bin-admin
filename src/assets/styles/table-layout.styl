@@ -127,3 +127,29 @@
     padding-right: 65px;
   }
 }
+// 设置面板的样式
+.bin-modal.setting-panel {
+  .bin-modal-body {
+    padding: 10px 0;
+  }
+  .panel {
+    min-height: 300px;
+    .item {
+      display: flex;
+      line-height: 49px;
+      height: 50px;
+      border-bottom: 1px solid #eee;
+      padding: 0 30px;
+      > span:first-child {
+        width: 85px;
+        font-size: 14px;
+      }
+      > span:last-child {
+        flex: 1;
+      }
+      &:last-child {
+        border-bottom: none;
+      }
+    }
+  }
+}

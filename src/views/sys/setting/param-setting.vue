@@ -23,15 +23,17 @@
       <template v-slot:confName="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.confName }}</a>
       </template>
-      <!--状态-->
+      <!--取值模式-->
       <template v-slot:valueMode="scope">
-        <b-tag type="primary" size="medium">{{ scope.row.valueMode}}</b-tag>
+        <b-tag :type="scope.row.valueMode|valueModeStyleFilter" size="medium">
+          {{ scope.row.valueMode | valueModeFilter}}
+        </b-tag>
       </template>
       <!--操作栏-->
       <template v-slot:action="scope">
-        <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>
-          修改
-        </b-button>
+        <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
+        <b-divider type="vertical"></b-divider>
+        <b-button :disabled="!canModify" type="text" @click="handleSet(scope.row)" v-waves>设置</b-button>
         <!--是否有删除键-->
         <template v-if="canRemove">
           <b-divider type="vertical"></b-divider>
@@ -46,13 +48,13 @@
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
       <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
-        <v-key-label label="所属类型" is-half is-first>{{ conf.typeId }}</v-key-label>
+        <v-key-label label="所属类型" is-half is-first>{{ currentTreeNode.title }}</v-key-label>
         <v-key-label label="参数名称" is-half>{{ conf.confName }}</v-key-label>
         <v-key-label label="参数编码" is-half is-first>{{ conf.confCode }}</v-key-label>
         <v-key-label label="完整编码" is-half>{{ conf.routeCode }}</v-key-label>
-        <v-key-label label="取值模式" is-half is-first>{{ conf.valueMode }}</v-key-label>
+        <v-key-label label="取值模式" is-half is-first>{{ conf.valueMode | valueModeFilter }}</v-key-label>
         <v-key-label label="排序编号" is-half>{{ conf.sortNum }}</v-key-label>
-        <v-key-label label="参数值" is-half is-first>{{ conf.confValue }}</v-key-label>
+        <v-key-label label="当前值" is-half is-first>{{ conf.confValue }}</v-key-label>
         <v-key-label label="内部值" is-half>{{ conf.realValue }}</v-key-label>
         <v-key-label label="取值范围" is-half is-first>{{ conf.valueRange }}</v-key-label>
         <v-key-label label="内部取值范围" is-half>{{ conf.realValueRange }}</v-key-label>
@@ -63,8 +65,94 @@
       </div>
       <!--增加编辑区域-->
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">
+        <b-form :model="conf" ref="form" :rules="ruleValidate" :label-width="100">
+          <div flex="box:mean">
+            <b-form-item label="所属类型" class="bin-form-item-required">
+              <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+            </b-form-item>
+            <b-form-item label="类别ID" class="bin-form-item-required">
+              <b-input :value="conf.typeId" disabled></b-input>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="参数名称" prop="confName">
+              <b-input v-model="conf.confName" placeholder="请输入参数名称" clearable></b-input>
+            </b-form-item>
+            <b-form-item label="参数编码" prop="confCode">
+              <b-input v-model="conf.confCode" placeholder="请输入参数编码" clearable></b-input>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="取值模式" prop="valueMode" class="bin-form-item-required">
+              <b-select v-model="conf.valueMode" size="large">
+                <b-option value="1">字符串</b-option>
+                <b-option value="2">内部单选</b-option>
+                <b-option value="3">内部多选</b-option>
+              </b-select>
+            </b-form-item>
+            <b-form-item label="排序编号" prop="sortNum">
+              <b-input-number :min="0" v-model="conf.sortNum" style="width: 100%;" size="large"></b-input-number>
+            </b-form-item>
+          </div>
+          <b-form-item label="描述" prop="desc">
+            <b-input v-model="conf.desc" placeholder="请输入描述" type="textarea"></b-input>
+          </b-form-item>
+          <template v-if="conf.valueMode!=='1'">
+            <b-divider align="left">{{ conf.valueMode|valueModeFilter }}</b-divider>
+            <!--遍历值缓存-->
+            <div flex="box:last" v-for="(item,index) in conf.bufferValue" :key="index">
+              <b-form-item label="显示值">
+                <b-input v-model="item.label" placeholder="请输入显示值" size="small" clearable></b-input>
+              </b-form-item>
+              <b-form-item label="内部值">
+                <b-input v-model="item.value" placeholder="请输入内部值" size="small" clearable></b-input>
+              </b-form-item>
+              <div style="width: 96px;padding-left: 20px;">
+                <b-button type="danger" size="small" icon="ios-close-circle-outline"
+                          v-waves plain @click="removeBufferRow(item)">删除
+                </b-button>
+              </div>
+            </div>
+            <div style="padding-left: 100px;margin-bottom: 17px;">
+              <b-button type="primary" size="small" icon="ios-add-circle-outline"
+                        v-waves plain @click="addBufferRow">添加选项
+              </b-button>
+            </div>
+            <b-divider></b-divider>
+          </template>
+          <!--保存-->
+          <b-form-item>
+            <b-button type="primary" v-waves @click="handleSubmit" :loading="btnLoading">确 定</b-button>
+            <b-button v-waves @click="handleCancel">取 消</b-button>
+          </b-form-item>
+        </b-form>
       </div>
     </b-drawer>
+    <!--参数设置弹窗-->
+    <b-modal v-model="settingVisible" title="参数设置" :mask-closable="false" width="600" class="setting-panel">
+      <div class="panel">
+        <div class="item"><span>参数名称：</span><span>{{ conf.confName}}</span></div>
+        <div class="item">
+          <span>参数类型：</span>
+          <span>
+            <b-tag :type="conf.valueMode|valueModeStyleFilter">
+              {{ conf.valueMode | valueModeFilter}}
+            </b-tag>
+          </span>
+        </div>
+        <div class="item">
+          <span>参数值：</span>
+          <span>
+            <param-conf :value-mode="conf.valueMode" :options="conf.bufferValue" v-model="conf.realValue"></param-conf>
+          </span>
+        </div>
+        <div class="item"><span>参数说明：</span><span>{{ conf.desc}}</span></div>
+      </div>
+      <div slot="footer" style="text-align: right;">
+        <b-button type="primary" v-waves @click="confSave" :loading="btnLoading">保存</b-button>
+        <b-button v-waves @click="settingVisible = false">取消</b-button>
+      </div>
+    </b-modal>
   </v-table-layout>
 </template>
 
@@ -72,11 +160,13 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/paramConf'
+  import ParamConf from './param-conf'
 
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
   export default {
     name: 'ParamSetting',
+    components: { ParamConf },
     mixins: [commonMixin, permission],
     data () {
       const validateConfName = (rule, value, callback) => {
@@ -125,15 +215,28 @@
           { title: '参数名称', slot: 'confName' },
           { title: '参数编码', key: 'confCode' },
           { title: '完整编码', key: 'routeCode' },
+          { title: '排序编号', key: 'sortNum', width: 100, align: 'center' },
           { title: '取值模式', slot: 'valueMode', width: 120, align: 'center' },
-          { title: '当前值', key: 'confValue', width: 120, align: 'center' },
+          { title: '当前值', key: 'confValue', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         conf: null,
         ruleValidate: {
-          typeName: [requiredRule, { validator: validateConfName, trigger: 'blur' }],
-          typeCode: [requiredRule, { validator: validateConfCode, trigger: 'blur' }]
-        }
+          confName: [requiredRule, { validator: validateConfName, trigger: 'blur' }],
+          confCode: [requiredRule, { validator: validateConfCode, trigger: 'blur' }]
+        },
+        settingVisible: false,
+        checkboxList: []
+      }
+    },
+    filters: {
+      valueModeFilter (value) {
+        let map = { '1': '字符串', '2': '内部单选', '3': '内部多选' }
+        return map[value]
+      },
+      valueModeStyleFilter (value) {
+        let map = { '1': 'info', '2': 'primary', '3': 'success' }
+        return map[value]
       }
     },
     created () {
@@ -167,10 +270,136 @@
         this.resetConf()
         this.openEditPage('create')
       },
+      // 编辑事件
+      handleModify (row) {
+        this.resetConf()
+        this.conf = { ...this.conf, ...row }
+        this.stringToBuffer()
+        this.openEditPage('modify')
+      },
+      // 设置操作按钮
+      handleSet (row) {
+        this.resetConf()
+        this.conf = { ...this.conf, ...row }
+        this.stringToBuffer()
+        this.settingVisible = true
+      },
+      // 保存配置
+      confSave () {
+        // 如果是字符串模式，则参数值需要同步至内部值
+        if (this.conf.valueMode === '1') {
+          this.conf.confValue = this.conf.realValue
+        } else if (this.conf.valueMode === '2') {
+          const choose = this.conf.bufferValue.find(item => item.value === this.conf.realValue)
+          this.conf.confValue = choose.label
+        } else {
+          this.conf.confValue = this.conf.bufferValue
+            .filter(item => this.conf.realValue.includes(item.value))
+            .map(item => item.label).join(',')
+        }
+        this.btnLoading = true
+        api.setConf(this.conf).then(res => {
+          if (res.data.code === '0') {
+            this.btnLoading = false
+            this.settingVisible = false
+            this.$message({ type: 'success', content: '操作成功' })
+            this.searchList()
+          } else {
+            this.$message({ type: 'error', content: res.data.message })
+          }
+        })
+      },
+      // 弹窗提示是否删除
+      handleRemove (row) {
+        let conf = { ...row }
+        this.$confirm({
+          title: '警告',
+          content: `确实要删除当前配置吗？`,
+          loading: true,
+          onOk: () => {
+            api.removeConf(conf).then(res => {
+              if (res.data.code === '0') {
+                this.$message({ type: 'success', content: '操作成功' })
+                this.$modal.remove()
+                this.initTree()
+              } else {
+                this.$modal.remove()
+                this.$message({ type: 'danger', content: res.data.message })
+              }
+            })
+          }
+        })
+      },
       // 查看按钮事件
       handleCheck (row) {
         this.conf = { ...row }
         this.openEditPage('check')
+      },
+      // 表单提交
+      handleSubmit () {
+        this.$refs.form.validate((valid) => {
+          if (valid) {
+            // 根据bufferValue中的值来填充两个字符串
+            this.bufferToString() // 转换缓存数组
+            this.btnLoading = true
+            let fun = this.dialogStatus === 'create' ? api.createConf : api.modifyConf
+            fun(this.conf).then(res => {
+              if (res.data.code === '0') {
+                this.btnLoading = false
+                this.dialogFormVisible = false
+                this.$message({ type: 'success', content: '操作成功' })
+                this.searchList()
+              } else {
+                this.$message({ type: 'error', content: res.data.message })
+              }
+            })
+          }
+        })
+      },
+      // 添加一行选项
+      addBufferRow () {
+        if (this.checkBufferValueNotEmpty()) {
+          this.conf.bufferValue.push({ label: '', value: '' })
+        } else {
+          this.$message({ content: '显示值和内部值必填', type: 'danger' })
+        }
+      },
+      // 删除一行
+      removeBufferRow (item) {
+        let index = this.conf.bufferValue.indexOf(item)
+        this.conf.bufferValue.splice(index, 1)
+      },
+      // 检查bufferValue中的值是否都不为空
+      checkBufferValueNotEmpty () {
+        return this.conf.bufferValue.every(item => item.label.length > 0 && item.value.length > 0)
+      },
+      // 缓存数组转换成对应字段
+      bufferToString () {
+        let valueRangeArr = []
+        let realValueRangeArr = []
+        this.conf.bufferValue.forEach(item => {
+          if (item.label.length > 0 && item.value.length > 0) {
+            valueRangeArr.push(item.label)
+            realValueRangeArr.push(item.value)
+          }
+        })
+        this.conf.valueRange = valueRangeArr.join(',')
+        this.conf.realValueRange = realValueRangeArr.join(',')
+      },
+      // 编辑时将两个字符串内容拼接至显示数组
+      stringToBuffer () {
+        let valueRangeArr = this.conf.valueRange.split(',')
+        let realValueRangeArr = this.conf.realValueRange.split(',')
+        // 需要判断两个数组值是否是一致的,如一致则拷贝至缓存数组进行编辑，不一致则下次保存时会覆盖新的缓存数组
+        if (valueRangeArr.length === realValueRangeArr.length) {
+          this.conf.bufferValue = [] // 初始化空数组
+          for (let i = 0; i < valueRangeArr.length; i++) {
+            this.conf.bufferValue.push({
+              label: valueRangeArr[i],
+              value: realValueRangeArr[i]
+            })
+          }
+        }
       },
       /* [数据接口] */
       // 重置对象
@@ -180,13 +409,17 @@
           typeId: this.currentTreeNode ? this.currentTreeNode.id : '',
           confName: '',
           confCode: '',
-          confValue: '',
-          realValue: '',
-          valueMode: '',
-          valueRange: '',
-          realValueRange: '',
+          confValue: '', // 参数值，即当前值，存储显示值，字符串时需要同步显示值和实际值
+          realValue: '', // 内部值,及实际存储数据库中的值，字符串模式时需要同步至实际值
+          valueMode: '1', // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
+          valueRange: '', // 取值范围，及显示值
+          realValueRange: '', // 内部值，及value实际值
           sortNum: 0,
-          desc: ''
+          desc: '',
+          // 缓存数组，用于添加编辑取值范围和显示值
+          // 在修改时，需要手动根据valueRange和realValueRange手动分隔数组至这两个缓存中用于修改
+          // 设置时，也需要根据这两个数组和valueMode来动态生成单选框和复选框组
+          bufferValue: [{ label: '', value: '' }]
         }
       },
       // tree:初始化树结构

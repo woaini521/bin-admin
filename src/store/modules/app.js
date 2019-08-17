@@ -1,5 +1,4 @@
 import { getAdminSetting, setAdminSetting } from '../../utils/datastore'
-import log from '../../utils/log'
 
 const app = {
   state: {
@@ -77,7 +76,6 @@ const app = {
       commit('SET_THEME', theme)
       // 3. 设置菜单栏位置
       commit('SET_MENU_TYPE', menuType)
-      log.success('>>>>>>loadApp>>>>>>')
     },
     setThemeMode: ({ commit }, theme) => {
       document.body.className = `theme-${theme}`
