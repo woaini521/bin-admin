@@ -60,7 +60,7 @@
         <v-key-label label="内部取值范围" is-half>{{ conf.realValueRange }}</v-key-label>
         <v-key-label label="描述" is-bottom>{{ conf.desc }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
+          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div>
       <!--增加编辑区域-->

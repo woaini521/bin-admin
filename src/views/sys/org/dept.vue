@@ -7,7 +7,7 @@
       <v-filter-item title="部门名称">
         <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="显示禁用" width="160px">
+      <v-filter-item title="禁用状态" width="160px">
         <b-switch size="large" v-model="listQuery.delFlag" :true-value="ENUM.Y" :false-value="ENUM.N"
                   @on-change="handleFilter">
           <span slot="open">显示</span>
@@ -65,7 +65,7 @@
         <v-key-label label="部门全称" is-half>{{ depart.fullName }}</v-key-label>
         <v-key-label label="备注" label-width="150px" is-bottom>{{ depart.remark }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
+          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div>
       <!--增加编辑区域-->
@@ -247,13 +247,6 @@
       }
     },
     computed: {
-      valueModeOptions () {
-        let ret = []
-        Object.keys(this.valueModeMap).forEach(key => {
-          ret.push({ value: key, label: this.valueModeMap[key] })
-        })
-        return ret
-      },
       ENUM () {
         return { N: 'N', Y: 'Y', ORG: '机构', COMMON: '一般组织' } // 常量比对键值对
       }

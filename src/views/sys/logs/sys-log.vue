@@ -35,7 +35,7 @@
         <v-key-label label="远程地址">{{ current.remoteAddress }}</v-key-label>
         <v-key-label label="操作结果" is-bottom>{{ current.actionResult }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
+          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div>
     </b-drawer>

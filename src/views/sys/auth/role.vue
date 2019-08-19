@@ -19,7 +19,7 @@
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.name }}</a>
       </template>
       <template v-slot:roleType="scope">
-        <b-tag v-if="scope.row.roleType===ENUM.IN" type="primary">{{ roleTypeMap[scope.row.roleType] }}</b-tag>
+        <b-tag v-if="scope.row.roleType===ENUM.I" type="primary">{{ roleTypeMap[scope.row.roleType] }}</b-tag>
         <b-tag v-else type="warning">{{ roleTypeMap[scope.row.roleType] }}</b-tag>
       </template>
       <!--角色授权栏-->
@@ -30,7 +30,7 @@
       <template v-slot:action="scope">
         <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
         <!--是否有删除键-->
-        <template v-if="canRemove && scope.row.roleType===ENUM.SYS">
+        <template v-if="canRemove && scope.row.roleType===ENUM.S">
           <b-divider type="vertical"></b-divider>
           <b-button type="text" v-waves style="color:red;" @click="handleRemove(scope.row)">删除</b-button>
         </template>
@@ -50,7 +50,7 @@
         <v-key-label label="父级角色名称">{{ role.parentName }}</v-key-label>
         <v-key-label label="描述" is-bottom>{{ role.desc }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
+          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div>
       <div v-else style="padding: 20px;">
@@ -162,8 +162,7 @@
         role: null,
         ruleValidate: {
           name: [requiredRule, { validator: validateName, trigger: 'blur' }],
-          code: [requiredRule, { validator: validateCode, trigger: 'blur' }],
-          desc: [requiredRule]
+          code: [requiredRule, { validator: validateCode, trigger: 'blur' }]
         },
         roleTypeMap: { 'S': '系统创建', 'I': '内置角色' }
       }
@@ -177,7 +176,7 @@
         return ret
       },
       ENUM () {
-        return { SYS: 'S', IN: 'I' } // 常量比对键值对
+        return { S: 'S', I: 'I' } // 常量比对键值对I:系统角色，S：应用角色
       }
     },
     created () {
@@ -281,7 +280,7 @@
           id: '',
           name: '',
           code: '',
-          roleType: '',
+          roleType: this.ENUM.S,
           desc: '',
           parentId: '',
           parentName: ''

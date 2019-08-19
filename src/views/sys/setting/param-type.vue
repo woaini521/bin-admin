@@ -38,7 +38,6 @@
     <!--编辑抽屉-->
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" :title="editTitle"
               footer-hide fullscreen>
-      {{type.id}}
       <!--查询内容区域-->
       <div v-if="dialogStatus==='check'" style="width:500px;padding: 20px;">
         <v-key-label label="类别名称">{{ type.typeName }}</v-key-label>
@@ -47,7 +46,7 @@
         <v-key-label label="排序编号">{{ type.sortNum }}</v-key-label>
         <v-key-label label="描述" is-bottom>{{ type.desc }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">取 消</b-button>
+          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div> <!--增加编辑区域-->
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">

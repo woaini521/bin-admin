@@ -2,6 +2,13 @@
 import request from './api_request'
 
 // 通用yes no 枚举
+export function getUserStatus () {
+  return request.get('/management/enum/commStatus', {
+    type: 'init'
+  })
+}
+
+// 通用yes no 枚举
 export function getYn () {
   return request.get('/management/enum/yn')
 }
