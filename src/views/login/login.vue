@@ -44,7 +44,7 @@
 </template>
 
 <script>
-  import { getVerifyCode, login } from '../../api/auth'
+  import { getVerifyCode, login } from '../../api/login'
   import util from '../../utils/util'
 
   export default {

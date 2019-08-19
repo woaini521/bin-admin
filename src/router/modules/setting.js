@@ -16,7 +16,7 @@ export default {
       path: 'paramType',
       name: 'ParamType',
       component: () => import(/* webpackChunkName: "setting" */ '../../views/sys/setting/param-type'),
-      meta: { title: '参数类型' }
+      meta: { title: '类别信息' }
     },
     {
       path: 'paramSetting',

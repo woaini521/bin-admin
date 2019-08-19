@@ -176,7 +176,6 @@
         }
       }
       const validateUnified = (rule, value, callback) => {
-        console.log(value)
         if (this.depart.departKind === this.ENUM.COMMON) {
           if (value.length === 0) {
             callback(new Error('一般组织必须填写此项'))

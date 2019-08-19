@@ -24,3 +24,29 @@ export function getVerifyCode () {
 export function login (data) {
   return requestPost('/auth/login', data)
 }
+
+/**
+ * 获取用户信息
+ * @returns {*}
+ */
+export function getInfo () {
+  return request.get('/user/info')
+}
+
+/**
+ * 修改登录密码
+ * @param oldPwd
+ * @param pwd
+ * @param confirmPwd
+ */
+export function modifyPwd (oldPwd, pwd, confirmPwd) {
+  return request({
+    url: '/user/modifyPwd',
+    method: 'post',
+    data: {
+      oldPwd: oldPwd,
+      pwd: pwd,
+      confirmPwd: confirmPwd
+    }
+  })
+}

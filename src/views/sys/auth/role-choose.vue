@@ -3,12 +3,12 @@
     <div style="min-height: 300px;">
       <div flex="cross:center">
         <span style="width: 70px;">角色名称</span>
-        <b-input v-model.trim="listQuery.name" size="small" placeholder="角色名称" clearable style="width: 280px;">
+        <b-input v-model.trim="listQuery.name" size="small" placeholder="角色名称" style="width: 280px;">
           <b-icon name="ios-search" slot="suffix" @click.native="handleFilter" style="cursor: pointer;"></b-icon>
         </b-input>
       </div>
       <b-divider align="left">角色列表</b-divider>
-      <b-button v-waves plain round @click="chooseOne({id:'',name:''})" type="info">无父角色</b-button>
+      <b-button v-waves plain round @click="chooseOne({id:'',name:'',code:''})" type="info">空</b-button>
       <b-button v-for="item in list" :key="item.id" v-waves round plain
                 :type="item.roleType==='I'?'primary':'warning'"
                 @click="chooseOne(item)">{{item.name}}
@@ -40,6 +40,7 @@
     methods: {
       open () {
         this.chooseDialog = true
+        this.listQuery.name = ''
         this.searchList()
       },
       // 查询所有部门列表
@@ -57,7 +58,7 @@
       // 选中一个角色
       chooseOne (item) {
         this.chooseDialog = false
-        this.$emit('on-choose', { id: item.id, name: item.name })
+        this.$emit('on-choose', { id: item.id, name: item.name, code: item.code })
       }
     }
   }

@@ -235,7 +235,6 @@
         getDictType().then(res => {
           if (res.status === 200) {
             this.dictTypeMap = res.data.data
-            console.log(this.dictTypeMap)
           }
         })
       },
