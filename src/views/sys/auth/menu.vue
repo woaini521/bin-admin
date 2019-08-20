@@ -177,6 +177,18 @@
         this.menu = { ...row }
         this.openEditPage('check')
       },
+      // 单个启用禁用
+      handleChangeDelFlag (row) {
+        let menu = { ...row }
+        api.changeDelFlag(menu).then(res => {
+          if (res.data.code === '0') {
+            this.$message({ type: 'success', content: '操作成功' })
+            this.initTree()
+          } else {
+            this.$message({ type: 'danger', content: '操作失败' })
+          }
+        })
+      },
       /* [数据接口] */
       // 重置对象
       resetMenu () {
