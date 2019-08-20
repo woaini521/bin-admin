@@ -13,6 +13,11 @@ export function getYn () {
   return request.get('/management/enum/yn')
 }
 
+// 菜单类型枚举
+export function getMenuType () {
+  return request.get('/management/enum/menuType')
+}
+
 // 配置取值模式枚举
 export function getValueMode () {
   return request.get('/management/enum/valueMode')

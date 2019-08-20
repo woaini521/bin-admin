@@ -119,7 +119,7 @@
               {{ role.name }}
             </b-tag>
             <b-button type="primary" v-waves size="small" style="vertical-align: middle;" plain
-                      :disabled="!isAdmin(user)" @click="handleShowDialogChoose">选择角色
+                      :disabled="isAdmin(user)" @click="handleShowDialogChoose">选择角色
             </b-button>
           </b-form-item>
           <b-form-item label="备注" prop="remark">
@@ -145,6 +145,7 @@
   import { getUserStatus } from '../../../api/enum'
   import { isEmail, isTelCode } from '../../../utils/validate'
   import { Decrypt, Encrypt } from '../../../utils/secret'
+  import { deepCopy } from '../../../utils/assist'
   import RoleChoose from '../auth/role-choose'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
@@ -300,7 +301,7 @@
       // 编辑事件
       handleModify (row) {
         this.resetUser()
-        this.user = { ...this.user, ...row }
+        this.user = deepCopy({ ...this.user, ...row })
         // 解密手机号显示
         this.user.mobile = Decrypt(this.user.mobile)
         this.openEditPage('modify')
