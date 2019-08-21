@@ -112,40 +112,42 @@
               <b-input-number :min="0" v-model="menu.sortNum" style="width: 100%;" size="large"></b-input-number>
             </b-form-item>
           </div>
-          <!--动作列表编辑框-->
-          <b-divider align="left">动作列表</b-divider>
-          <b-alert show-icon type="error">
-            <b-icon name="ios-alert" slot="icon"></b-icon>
-            注意：只有勾选过的动作菜单，保存时才能生效！如移除已存在的动作，则会同时移除其权限！
-          </b-alert>
-          <b-table disabled-hover :data="permissionBuffer" stripe width="820"
-                   @on-selection-change="handleSelect" ref="selection"
-                   :columns="[{type: 'selection', width: 50, align: 'center'},
+          <template v-if="menu.permissions.length===0">
+            <b-form-item label="动作菜单">
+              <b-button type="primary" plain v-waves round @click="initPermissions">初始化</b-button>
+            </b-form-item>
+          </template>
+          <template v-else>
+            <!--动作列表编辑框-->
+            <b-divider align="left">动作列表</b-divider>
+            <b-table disabled-hover :data="menu.permissions" stripe width="820" ref="selection"
+                     :columns="[
                      { title: '动作名称', slot: 'name', width:120 },
                      { title: '前端路径', slot: 'path'},
                      { title: '菜单路径', slot: 'url' },
                      { title: '操作', slot: 'action', width: 50, align: 'center'}]">
-            <template v-slot:name="scope">
-              <b-input v-model="scope.row.name" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
-            </template>
-            <template v-slot:path="scope">
-              <b-input v-model="scope.row.path" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
-            </template>
-            <template v-slot:url="scope">
-              <b-input v-model="scope.row.url" size="small"></b-input>
-            </template>
-            <template v-slot:action="scope">
-              <i class="iconfont icon-ios-remove-circle-outline"
-                 style="font-size: 18px;color:red;cursor: pointer;"
-                 @click="removeBufferRow(scope.row)"></i>
-            </template>
-          </b-table>
-          <div style="padding: 10px 0 0 58px;">
-            <b-button type="primary" size="small" icon="ios-add-circle-outline"
-                      v-waves plain @click="addBufferRow">添加动作
-            </b-button>
-          </div>
-          <b-divider></b-divider>
+              <template v-slot:name="scope">
+                <b-input v-model="scope.row.name" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
+              </template>
+              <template v-slot:path="scope">
+                <b-input v-model="scope.row.path" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
+              </template>
+              <template v-slot:url="scope">
+                <b-input v-model="scope.row.url" size="small"></b-input>
+              </template>
+              <template v-slot:action="scope">
+                <i class="iconfont icon-ios-remove-circle-outline"
+                   style="font-size: 18px;color:red;cursor: pointer;"
+                   @click="removeBufferRow(scope.row,scope.index)"></i>
+              </template>
+            </b-table>
+            <div style="padding: 10px 0 0 58px;">
+              <b-button type="primary" size="small" icon="ios-add-circle-outline"
+                        v-waves plain @click="addBufferRow">添加动作
+              </b-button>
+            </div>
+            <b-divider></b-divider>
+          </template>
           <!--保存-->
           <b-form-item>
             <b-button type="primary" v-waves @click="handleSubmit" :loading="btnLoading">确 定</b-button>
@@ -202,7 +204,6 @@
           { title: '操作', slot: 'action', width: 120 }
         ],
         menu: null,
-        permissionBuffer: [],
         ruleValidate: {
           name: [{ required: true, message: '必填项', trigger: 'blur' }],
           path: [{ required: true, message: '必填项', trigger: 'blur' }, { validator: checkMenuPath, trigger: 'blur' }]
@@ -251,21 +252,12 @@
       // 新增按钮事件
       handleCreate () {
         this.resetMenu()
-        // 创建时动作缓存初始化4个动作
-        this.permissionBuffer = [
-          { id: '', name: '新增', path: 'create', url: '' },
-          { id: '', name: '更新', path: 'modify', url: '' },
-          { id: '', name: '查询', path: 'search', url: '' },
-          { id: '', name: '删除', path: 'remove', url: '' }
-        ]
         this.openEditPage('create')
       },
       // 编辑事件
       handleModify (row) {
         this.resetMenu()
         this.menu = deepCopy({ ...this.menu, ...row })
-        // 还原permission至buffer
-        this.permissionBuffer = deepCopy(this.menu.permissions)
         this.openEditPage('modify')
       },
       // 查看按钮事件
@@ -294,59 +286,13 @@
           }
         })
       },
-      // 动作菜单已经勾选的项
-      handleSelect (items) {
-        this.menu.permissions = deepCopy(items.filter(i => i.path.length > 0 && i.name.length > 0))
-      },
-      // 添加一行选项
-      addBufferRow () {
-        if (this.checkBufferValueNotEmpty()) {
-          this.permissionBuffer.push({ id: '', name: '', path: '', url: '' })
-          this.menu.permissions = []// 新增和删除一行时需要清空重新选择
-        } else {
-          this.$message({ content: '名称和前端路径必填', type: 'danger' })
-        }
-      },
-      // 删除一行
-      removeBufferRow (item) {
-        if (item.id.length === 0) {
-          let index = this.permissionBuffer.indexOf(item)
-          this.permissionBuffer.splice(index, 1)
-          this.menu.permissions = []// 新增和删除一行时需要清空重新选择
-        } else {
-          let menu = { ...item }
-          this.$confirm({
-            title: '警告',
-            content: `确实要删除当前行吗？`,
-            loading: true,
-            onOk: () => {
-              api.removeMenu(menu).then(res => {
-                if (res.data.code === '0') {
-                  this.$message({ type: 'success', content: '操作成功' })
-                  this.$modal.remove()
-                  this.searchList()
-                } else {
-                  this.$modal.remove()
-                  this.$message({ type: 'danger', content: res.data.message })
-                }
-              })
-            }
-          })
-        }
-      },
-      // 检查bufferValue中的值是否都不为空
-      checkBufferValueNotEmpty () {
-        return this.permissionBuffer.every(item => item.path.length > 0 && item.name.length > 0)
-      },
-      // 是否是只读的动作
-      permissionReadOnly (per) {
-        return ['create', 'modify', 'search', 'remove'].includes(per)
-      },
       // 表单提交
       handleSubmit () {
         this.$refs.form.validate((valid) => {
           if (valid) {
             this.btnLoading = true
+            let tmp = this.menu.permissions.filter(i => i.name.length > 0 && i.path.length > 0)
+            this.menu.permissions = deepCopy(tmp)
             let fun = this.dialogStatus === 'create' ? api.createMenu : api.modifyMenu
             fun(this.menu).then(res => {
               if (res.data.code === '0') {
@@ -372,6 +318,59 @@
             this.$message({ type: 'danger', content: '操作失败' })
           }
         })
+      },
+      /* [动作菜单操作相关] */
+      // 初始化4个基本动作菜单
+      initPermissions () {
+        // 创建时动作缓存初始化4个动作
+        this.menu.permissions = [
+          { id: '', name: '新增', path: 'create', url: '', type: this.TYPE.ACT },
+          { id: '', name: '更新', path: 'modify', url: '', type: this.TYPE.ACT },
+          { id: '', name: '查询', path: 'search', url: '', type: this.TYPE.ACT },
+          { id: '', name: '删除', path: 'remove', url: '', type: this.TYPE.ACT }
+        ]
+      },
+      // 添加一行选项
+      addBufferRow () {
+        if (this.checkBufferValueNotEmpty()) {
+          this.menu.permissions.push({ id: '', name: '', path: '', url: '', type: this.TYPE.ACT })
+        } else {
+          this.$message({ content: '名称和前端路径必填', type: 'danger' })
+        }
+      },
+      // 删除一行
+      removeBufferRow (item, index) {
+        console.log(index)
+        if (item.id.length === 0) {
+          this.menu.permissions.splice(index, 1)
+        } else {
+          let menu = { ...item }
+          this.$confirm({
+            title: '警告',
+            content: `删除此行可能会移除授权关联，确认删除嘛？`,
+            loading: true,
+            onOk: () => {
+              api.removeMenu(menu).then(res => {
+                if (res.data.code === '0') {
+                  this.$message({ type: 'success', content: '操作成功' })
+                  this.$modal.remove()
+                  this.menu.permissions.splice(index, 1)
+                } else {
+                  this.$modal.remove()
+                  this.$message({ type: 'danger', content: res.data.message })
+                }
+              })
+            }
+          })
+        }
+      },
+      // 检查bufferValue中的值是否都不为空
+      checkBufferValueNotEmpty () {
+        return this.menu.permissions.every(item => item.path.length > 0 && item.name.length > 0)
+      },
+      // 是否是只读的动作
+      permissionReadOnly (per) {
+        return ['create', 'modify', 'search', 'remove'].includes(per)
       },
       /* [数据接口] */
       // 重置对象
