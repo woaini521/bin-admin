@@ -340,7 +340,6 @@
       },
       // 删除一行
       removeBufferRow (item, index) {
-        console.log(index)
         if (item.id.length === 0) {
           this.menu.permissions.splice(index, 1)
         } else {
