@@ -36,7 +36,7 @@ export function createMenu (menu) {
       name: menu.name,
       type: menu.type,
       url: menu.url,
-      path: menu.regionId,
+      path: menu.path,
       sortNum: menu.sortNum,
       permissions: menu.permissions
     }
@@ -54,9 +54,20 @@ export function modifyMenu (menu) {
       name: menu.name,
       type: menu.type,
       url: menu.url,
-      path: menu.regionId,
+      path: menu.path,
       sortNum: menu.sortNum,
       permissions: menu.permissions
+    }
+  })
+}
+
+/* 删除菜单 */
+export function removeMenu (menu) {
+  return request({
+    url: '/management/function/remove',
+    method: 'post',
+    params: {
+      id: menu.id
     }
   })
 }

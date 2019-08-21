@@ -12,6 +12,12 @@ export function validateDate (str) {
   return reg.test(str)
 }
 
+/* 校验路由路径path */
+export function validateRoutePath (path) {
+  const reg = /^(\/\w+)|(\/\w+\/\w+)$/
+  return !reg.test(path)
+}
+
 /* 匹配合法文件相对路径 */
 export function validateFilePath (str) {
   const reg = /^((\w+\/)*\w+\.html)$/

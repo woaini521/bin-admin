@@ -69,6 +69,7 @@
 .bin-table {
   .bin-table-header th, .bin-table-fixed-header th {
     color: #333;
+    font-weight: 500;
     background-color: #f3faff;
   }
   th, td {
@@ -85,6 +86,10 @@
 }
 .bin-table-fixed-right {
   box-shadow: 0 0 10px rgba(0, 0, 0, .12)
+}
+
+.bin-table-cell.bin-table-cell-with-selection .bin-checkbox {
+  margin-right: 0;
 }
 // 表单=》可同步至bin-ui
 .bin-input[disabled], fieldset[disabled] .bin-input {

@@ -62,22 +62,96 @@
     <!--编辑抽屉-->
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
-      <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
-        <v-key-label label="菜单名称" is-half is-first>{{ menu.name }}</v-key-label>
-        <v-key-label label="上级菜单" is-half>{{ currentTreeNode.title }}</v-key-label>
+      <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;user-select:text;">
+        <v-key-label label="上级菜单" is-half is-first>{{ currentTreeNode.title }}</v-key-label>
+        <v-key-label label="菜单名称" is-half>{{ menu.name }}</v-key-label>
         <v-key-label label="菜单类型" is-half is-first>
           <b-tag>{{ menuTypeMap[menu.type] }}</b-tag>
         </v-key-label>
         <v-key-label label="排序编号" is-half>{{ menu.sortNum }}</v-key-label>
-        <v-key-label label="菜单路径">{{ menu.url }}</v-key-label>
-        <v-key-label label="菜单路径串">{{ menu.route }}</v-key-label>
         <v-key-label label="前端路由" is-bottom>{{ menu.path }}</v-key-label>
+        <template v-if="menu.permissions">
+          <b-divider align="left">动作列表</b-divider>
+          <b-table disabled-hover :data="menu.permissions" stripe width="860"
+                   :columns="[
+                     { title: '动作名称', key: 'name', width:120, align: 'center', },
+                     { title: '前端路由', key: 'path'},
+                     { title: '菜单路径', key: 'url' }]">
+          </b-table>
+        </template>
         <div style="padding: 10px;text-align: center;">
           <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
         </div>
       </div>
       <!--增加编辑区域-->
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">
+        <b-form :model="menu" ref="form" :rules="ruleValidate" :label-width="100">
+          <div flex="box:mean">
+            <b-form-item label="上级菜单" class="bin-form-item-required">
+              <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+            </b-form-item>
+            <b-form-item label="菜单类型" class="bin-form-item-required">
+              <b-select :value="menu.type" size="large">
+                <b-option :value="menu.type">{{ menuTypeMap[menu.type] }}</b-option>
+              </b-select>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="菜单名称" prop="name">
+              <b-input v-model="menu.name" placeholder="请输入菜单名称" clearable></b-input>
+            </b-form-item>
+            <b-form-item label="前端路由" prop="path">
+              <b-input v-model="menu.path" placeholder="请输入前端路由" clearable></b-input>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="菜单路径" prop="url">
+              <b-input v-model="menu.url" placeholder="请输入菜单路径" clearable></b-input>
+            </b-form-item>
+            <b-form-item label="排序编号" prop="sortNum">
+              <b-input-number :min="0" v-model="menu.sortNum" style="width: 100%;" size="large"></b-input-number>
+            </b-form-item>
+          </div>
+          <!--动作列表编辑框-->
+          <b-divider align="left">动作列表</b-divider>
+          <b-alert show-icon type="error">
+            <b-icon name="ios-alert" slot="icon"></b-icon>
+            注意：只有勾选过的动作菜单，保存时才能生效！如移除已存在的动作，则会同时移除其权限！
+          </b-alert>
+          <b-table disabled-hover :data="permissionBuffer" stripe width="820"
+                   @on-selection-change="handleSelect" ref="selection"
+                   :columns="[{type: 'selection', width: 50, align: 'center'},
+                     { title: '动作名称', slot: 'name', width:120 },
+                     { title: '前端路径', slot: 'path'},
+                     { title: '菜单路径', slot: 'url' },
+                     { title: '操作', slot: 'action', width: 50, align: 'center'}]">
+            <template v-slot:name="scope">
+              <b-input v-model="scope.row.name" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
+            </template>
+            <template v-slot:path="scope">
+              <b-input v-model="scope.row.path" size="small" :readonly="permissionReadOnly(scope.row.path)"></b-input>
+            </template>
+            <template v-slot:url="scope">
+              <b-input v-model="scope.row.url" size="small"></b-input>
+            </template>
+            <template v-slot:action="scope">
+              <i class="iconfont icon-ios-remove-circle-outline"
+                 style="font-size: 18px;color:red;cursor: pointer;"
+                 @click="removeBufferRow(scope.row)"></i>
+            </template>
+          </b-table>
+          <div style="padding: 10px 0 0 58px;">
+            <b-button type="primary" size="small" icon="ios-add-circle-outline"
+                      v-waves plain @click="addBufferRow">添加动作
+            </b-button>
+          </div>
+          <b-divider></b-divider>
+          <!--保存-->
+          <b-form-item>
+            <b-button type="primary" v-waves @click="handleSubmit" :loading="btnLoading">确 定</b-button>
+            <b-button v-waves @click="handleCancel">取 消</b-button>
+          </b-form-item>
+        </b-form>
       </div>
     </b-drawer>
   </v-table-layout>
@@ -88,11 +162,21 @@
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/menu'
   import { getYn, getMenuType } from '../../../api/enum'
+  import { validateRoutePath } from '../../../utils/validate'
+  import { deepCopy } from '../../../utils/assist'
 
   export default {
     name: 'Menu',
     mixins: [commonMixin, permission],
     data () {
+      const checkMenuPath = (rule, value, callback) => {
+        if (value) {
+          if (validateRoutePath(value)) {
+            callback(new Error('请输入正确的菜单路由(如:/ace ; /ace/menu)'))
+          }
+        }
+        callback()
+      }
       return {
         listQuery: {
           menuName: '',
@@ -111,28 +195,24 @@
             }
           },
           { title: '菜单名称', slot: 'name' },
-          { title: '菜单类型', slot: 'type', width: 180, align: 'center' },
-          { title: '菜单路径', key: 'url' },
           { title: '前端路由', key: 'path' },
+          { title: '菜单类型', slot: 'type', width: 150, align: 'center' },
           { title: '排序编号', key: 'sortNum', width: 80, align: 'center' },
-          { title: '状态', slot: 'delFlag', width: 180, align: 'center' },
-          { title: '操作', slot: 'action', width: 180 }
+          { title: '状态', slot: 'delFlag', width: 150, align: 'center' },
+          { title: '操作', slot: 'action', width: 120 }
         ],
         menu: null,
-        ruleValidate: {},
+        permissionBuffer: [],
+        ruleValidate: {
+          name: [{ required: true, message: '必填项', trigger: 'blur' }],
+          path: [{ required: true, message: '必填项', trigger: 'blur' }, { validator: checkMenuPath, trigger: 'blur' }]
+        },
         ynMap: { 'N': '否', 'Y': '是' }, // 默认值这里Y是可以删除，可删除状态及为禁用
         menuTypeMap: { '1': '功能菜单', '2': '目录菜单', '3': '动作菜单' },
         TYPE: { FUN: '1', DIR: '2', ACT: '3' }
       }
     },
     computed: {
-      menuTypeOptions () {
-        let ret = []
-        Object.keys(this.menuTypeMap).forEach(key => {
-          ret.push({ value: key, label: this.menuTypeMap[key] })
-        })
-        return ret
-      },
       ENUM () {
         return { N: 'N', Y: 'Y' } // 常量比对键值对
       }
@@ -140,6 +220,7 @@
     created () {
       this.getYnEnum()
       this.getMenuTypeEnum()
+      this.resetMenu()
       this.initTree()
     },
     methods: {
@@ -170,12 +251,115 @@
       // 新增按钮事件
       handleCreate () {
         this.resetMenu()
+        // 创建时动作缓存初始化4个动作
+        this.permissionBuffer = [
+          { id: '', name: '新增', path: 'create', url: '' },
+          { id: '', name: '更新', path: 'modify', url: '' },
+          { id: '', name: '查询', path: 'search', url: '' },
+          { id: '', name: '删除', path: 'remove', url: '' }
+        ]
         this.openEditPage('create')
+      },
+      // 编辑事件
+      handleModify (row) {
+        this.resetMenu()
+        this.menu = deepCopy({ ...this.menu, ...row })
+        // 还原permission至buffer
+        this.permissionBuffer = deepCopy(this.menu.permissions)
+        this.openEditPage('modify')
       },
       // 查看按钮事件
       handleCheck (row) {
         this.menu = { ...row }
         this.openEditPage('check')
+      },
+      // 弹窗提示是否删除
+      handleRemove (row) {
+        let menu = { ...row }
+        this.$confirm({
+          title: '警告',
+          content: `确实要删除当前菜单吗？`,
+          loading: true,
+          onOk: () => {
+            api.removeMenu(menu).then(res => {
+              if (res.data.code === '0') {
+                this.$message({ type: 'success', content: '操作成功' })
+                this.$modal.remove()
+                this.searchList()
+              } else {
+                this.$modal.remove()
+                this.$message({ type: 'danger', content: res.data.message })
+              }
+            })
+          }
+        })
+      },
+      // 动作菜单已经勾选的项
+      handleSelect (items) {
+        this.menu.permissions = deepCopy(items.filter(i => i.path.length > 0 && i.name.length > 0))
+      },
+      // 添加一行选项
+      addBufferRow () {
+        if (this.checkBufferValueNotEmpty()) {
+          this.permissionBuffer.push({ id: '', name: '', path: '', url: '' })
+          this.menu.permissions = []// 新增和删除一行时需要清空重新选择
+        } else {
+          this.$message({ content: '名称和前端路径必填', type: 'danger' })
+        }
+      },
+      // 删除一行
+      removeBufferRow (item) {
+        if (item.id.length === 0) {
+          let index = this.permissionBuffer.indexOf(item)
+          this.permissionBuffer.splice(index, 1)
+          this.menu.permissions = []// 新增和删除一行时需要清空重新选择
+        } else {
+          let menu = { ...item }
+          this.$confirm({
+            title: '警告',
+            content: `确实要删除当前行吗？`,
+            loading: true,
+            onOk: () => {
+              api.removeMenu(menu).then(res => {
+                if (res.data.code === '0') {
+                  this.$message({ type: 'success', content: '操作成功' })
+                  this.$modal.remove()
+                  this.searchList()
+                } else {
+                  this.$modal.remove()
+                  this.$message({ type: 'danger', content: res.data.message })
+                }
+              })
+            }
+          })
+        }
+      },
+      // 检查bufferValue中的值是否都不为空
+      checkBufferValueNotEmpty () {
+        return this.permissionBuffer.every(item => item.path.length > 0 && item.name.length > 0)
+      },
+      // 是否是只读的动作
+      permissionReadOnly (per) {
+        return ['create', 'modify', 'search', 'remove'].includes(per)
+      },
+      // 表单提交
+      handleSubmit () {
+        this.$refs.form.validate((valid) => {
+          if (valid) {
+            this.btnLoading = true
+            let fun = this.dialogStatus === 'create' ? api.createMenu : api.modifyMenu
+            fun(this.menu).then(res => {
+              if (res.data.code === '0') {
+                this.btnLoading = false
+                this.dialogFormVisible = false
+                this.$message({ type: 'success', content: '操作成功' })
+                this.initTree()
+              } else {
+                this.$message({ type: 'error', content: res.data.message })
+              }
+            })
+          }
+        })
       },
       // 单个启用禁用
       handleChangeDelFlag (row) {
@@ -196,11 +380,11 @@
           id: '',
           parentId: this.currentTreeNode ? this.currentTreeNode.id : '',
           name: '',
-          sortNum: '',
+          sortNum: 0,
           url: '',
-          type: '',
+          type: this.TYPE.FUN, // 默认只创建功能菜单
           path: '',
-          permission: []
+          permissions: []
         }
       },
       // 通用枚举
