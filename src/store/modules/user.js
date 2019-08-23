@@ -27,6 +27,8 @@ export default {
         try {
           util.cookies.set(ACCESS_TOKEN, token)
           commit('SET_TOKEN', token)
+          commit('SET_ROLES', [])
+          commit('SET_INFO', null)
           resolve(token)
         } catch (e) {
           reject(e)

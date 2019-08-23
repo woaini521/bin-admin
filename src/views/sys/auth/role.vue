@@ -31,7 +31,7 @@
       </template>
       <!--操作栏-->
       <template v-slot:action="scope">
-        <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
+        <b-button :disabled="!canModify || !isAdmin" type="text" @click="handleModify(scope.row)" v-waves>修改</b-button>
         <!--是否有删除键-->
         <template v-if="canRemove && scope.row.roleType===ENUM.S">
           <b-divider type="vertical"></b-divider>
@@ -93,7 +93,7 @@
       </div>
     </b-drawer>
     <!--角色选择弹窗-->
-    <role-choose ref="roleChoose" @on-choose="handleChooseOne"></role-choose>
+    <role-choose ref="roleChoose" @on-choose="handleChooseOne" no-admin></role-choose>
     <!--角色授权抽屉-->
     <role-auth ref="roleAuth"></role-auth>
   </v-table-layout>
@@ -106,6 +106,7 @@
   import * as api from '../../../api/management/role'
   import RoleChoose from '../components/role-choose'
   import RoleAuth from '../components/role-auth'
+  import { mapGetters } from 'vuex'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 
@@ -171,6 +172,10 @@
       }
     },
     computed: {
+      ...mapGetters(['userInfo']),
+      isAdmin () {
+        return this.userInfo.roleCodes.includes('ROLE_ADMIN')
+      },
       roleTypeOptions () {
         let ret = []
         Object.keys(this.roleTypeMap).forEach(key => {
@@ -275,6 +280,7 @@
         getRoleType().then(res => {
           if (res.status === 200) {
             this.roleTypeMap = res.data.data
+            console.log(res.data.data)
           }
         })
       },

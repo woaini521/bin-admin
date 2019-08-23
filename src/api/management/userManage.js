@@ -41,7 +41,7 @@ export function createUser (user) {
 /* 修改用户信息 */
 export function modifyUser (user) {
   return request({
-    url: '/management/user/create',
+    url: '/management/user/modify',
     method: 'post',
     data: {
       id: user.id,

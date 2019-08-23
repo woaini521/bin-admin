@@ -75,8 +75,16 @@
     },
     created () {
       this.refreshCode()
+      document.addEventListener('keyup', this.enter)
     },
     methods: {
+      // enter键盘事件
+      enter (e) {
+        if (e.code === 'Enter') {
+          this.submit()
+        }
+      },
+      // 刷新验证码
       refreshCode () {
         getVerifyCode().then(response => {
           if (response.status === 200) {
@@ -106,14 +114,9 @@
       loginSuccess (res) {
         if (res.data.code === '0') {
           const token = res.data.data
-          this.$log.success('登录成功')
           this.$store.dispatch('setToken', token).then(() => {
             // 重定向对象不存在则返回顶层路径
-            this.$router.replace(this.$route.query.redirect || '/')
-            // 延迟 1 秒显示欢迎信息
-            setTimeout(() => {
-              this.$message({ content: `${util.timeFix()}，欢迎回来`, type: 'success' })
-            }, 1000)
+            this.$router.push('/')
           })
         } else {
           this.$message({ content: '登录失败请检查服务器', type: 'danger' })
@@ -123,6 +126,9 @@
       requestFailed (err) {
         this.$message({ type: 'danger', content: ((err.response || {}).data || {}).message || '请求出现错误，请稍后再试' })
       }
+    },
+    beforeDestroy () {
+      document.removeEventListener('keyup', this.enter)
     }
   }
 </script>

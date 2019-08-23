@@ -10,6 +10,7 @@
       <b-divider align="left">角色列表</b-divider>
       <b-button v-waves plain round @click="chooseOne({id:'',name:'',code:''})" type="info">空</b-button>
       <b-button v-for="item in list" :key="item.id" v-waves round plain
+                :disabled="noAdmin&&item.code==='ROLE_ADMIN'"
                 :type="item.roleType==='I'?'primary':'warning'"
                 @click="chooseOne(item)">{{item.name}}
       </b-button>
@@ -29,6 +30,9 @@
   export default {
     name: 'role-choose',
     mixins: [commonMixin, permission],
+    props: {
+      noAdmin: Boolean
+    },
     data () {
       return {
         listQuery: {
