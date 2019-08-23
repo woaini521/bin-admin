@@ -34,8 +34,7 @@ export default {
       case NUM:
         node = h('b-input-number', {
           props: {
-            value: this.number,
-            size: 'large'
+            value: this.number
           },
           on: { input: this.handleInputNum }
         })

@@ -2,18 +2,6 @@
 #app .bin-scrollbar__wrap {
   overflow-x: hidden;
 }
-// 2:menu行高设置
-.side-menu-wrapper .bin-menu {
-  line-height: 2em;
-  .bin-menu-item, .bin-menu-submenu-title span, .bin-menu-submenu-title {
-    > i:not(.icon-ios-arrow-down) {
-      position: relative;
-      top: -2px;
-      font-size: 18px;
-      vertical-align: middle;
-    }
-  }
-}
 
 .bin-drawer-wrapper .drawer-box {
   .header {
@@ -23,38 +11,9 @@
     height: calc(100% - 125px);
   }
 }
-// 2: 按钮间隔=》可同步至bin-ui
-.bin-button + .bin-button {
-  margin-left: 10px;
-}
-
+// 2: 按钮图标右间距
 .bin-button .iconfont {
   margin-right: 4px;
-}
-// 树=》可同步至bin-ui
-.bin-tree ul li {
-  margin: 0;
-  line-height: 26px;
-}
-.bin-tree-arrow {
-  vertical-align: top;
-  line-height: 22px;
-  margin-right: 4px;
-  .icon-ios-arrow-forward {
-    position: relative;
-    top: -1px;
-  }
-}
-.bin-tree-title {
-  padding: 0 6px;
-  line-height: 22px;
-}
-.bin-tree-title:hover {
-  background-color: #e6f7ff;
-}
-.bin-tree-title-selected, .bin-tree-title-selected:hover {
-  background-color: #1890ff;
-  color: #fff;
 }
 //  表格
 .bin-table-wrapper {
@@ -65,10 +24,6 @@
 }
 .bin-table-cell {
   padding: 0 8px;
-}
-//  表格内部的tooltip =》可同步至bin-ui
-.bin-table-cell-tooltip .bin-tooltip-rel {
-  vertical-align: middle;
 }
 .bin-table {
   .bin-table-header th, .bin-table-fixed-header th {
@@ -85,22 +40,7 @@
   }
 }
 
-//表格内部的多选框间距=》可同步至bin-ui
-.bin-table-cell.bin-table-cell-with-selection .bin-checkbox {
-  margin-right: 0;
-}
-// 表单=》可同步至bin-ui
-.bin-input[disabled], fieldset[disabled] .bin-input {
-  background-color: #f9f9f9;
-  color: #737d91;
-}
 //  container
 .bin-container .bin-container-footer {
   line-height: 1.5em;
-}
-
-// 箭头指示=》可同步至bin-ui
-.bin-input-number-handler-up-inner, .bin-input-number-handler-down-inner {
-  top: 50%;
-  margin-top: -6px;
 }
