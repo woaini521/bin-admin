@@ -32,7 +32,7 @@
         </div>
         <div class="footer">
           <p class="footer-copyright">
-            技术支持：徐州金碟软件有限公司
+            技术支持：徐州金蝶软件有限公司
           </p>
           <p class="footer-copyright">
             copyright:2016-2020 Kingdee All Right Reserved

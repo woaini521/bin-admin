@@ -27,7 +27,6 @@ export function createUser (user) {
     method: 'post',
     data: {
       username: user.username,
-      userCode: user.userCode,
       realName: user.realName,
       mobile: Encrypt(user.mobile),
       departId: user.departId,
@@ -47,7 +46,6 @@ export function modifyUser (user) {
     data: {
       id: user.id,
       username: user.username,
-      userCode: user.userCode,
       realName: user.realName,
       mobile: Encrypt(user.mobile),
       departId: user.departId,
@@ -101,18 +99,6 @@ export function oneUsername (user) {
     params: {
       id: user.id || '',
       username: user.username
-    }
-  })
-}
-
-/* 用户名是否唯一 */
-export function oneUserCode (user) {
-  return request({
-    url: '/management/user/checkUserCodeExists',
-    method: 'get',
-    params: {
-      id: user.id || '',
-      userCode: user.userCode
     }
   })
 }

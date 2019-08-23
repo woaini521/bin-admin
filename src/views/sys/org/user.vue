@@ -4,11 +4,11 @@
     <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
-      <v-filter-item title="用户名称">
-        <b-input v-model.trim="listQuery.username" size="small" placeholder="请输入用户名称" clearable></b-input>
+      <v-filter-item title="登录名称">
+        <b-input v-model.trim="listQuery.username" size="small" placeholder="请输入登录名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="真实姓名">
-        <b-input v-model.trim="listQuery.realName" size="small" placeholder="请输入真实姓名" clearable></b-input>
+      <v-filter-item title="中文名称">
+        <b-input v-model.trim="listQuery.realName" size="small" placeholder="请输入中文名称" clearable></b-input>
       </v-filter-item>
       <v-filter-item title="禁用状态" width="160px">
         <b-switch size="large" v-model="listQuery.status" :true-value="ENUM.DISABLE" :false-value="ENUM.ENABLE"
@@ -67,12 +67,11 @@
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
       <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
-        <v-key-label label="登录名称" is-half is-first>{{ user.username }}</v-key-label>
-        <v-key-label label="用户编码" is-half>{{ user.userCode }}</v-key-label>
-        <v-key-label label="中文名称" is-half is-first>{{ user.realName }}</v-key-label>
-        <v-key-label label="电话号码" is-half>{{ user.mobile | mobileFilter }}</v-key-label>
-        <v-key-label label="所属组织" is-half is-first>{{ currentTreeNode.title }}</v-key-label>
-        <v-key-label label="电子邮件" is-half>{{ user.email }}</v-key-label>
+        <v-key-label label="所属组织">{{ currentTreeNode.title }}</v-key-label>
+        <v-key-label label="用户名">{{ user.username }}</v-key-label>
+        <v-key-label label="姓名">{{ user.realName }}</v-key-label>
+        <v-key-label label="电话号码">{{ user.mobile | mobileFilter }}</v-key-label>
+        <v-key-label label="电子邮件">{{ user.email }}</v-key-label>
         <v-key-label label="角色">
           <template v-if="user.roles">
             <b-tag type="info" v-for="role in user.roles" :key="role.id">{{ role.name }}</b-tag>
@@ -87,27 +86,22 @@
       <!--增加编辑区域-->
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">
         <b-form :model="user" ref="form" :rules="ruleValidate" :label-width="100">
+          <b-form-item label="所属组织">
+            <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+          </b-form-item>
           <div flex="box:mean">
             <b-form-item label="登录名称" prop="username">
               <!--登录名称编辑时不可修改-->
               <b-input v-model="user.username" placeholder="请输入登录名称" clearable
                        :disabled="dialogStatus==='modify'"></b-input>
             </b-form-item>
-            <b-form-item label="用户编码" prop="userCode">
-              <b-input v-model="user.userCode" placeholder="请输入用户编码" clearable></b-input>
-            </b-form-item>
-          </div>
-          <div flex="box:mean">
             <b-form-item label="中文名称" prop="realName">
               <b-input v-model="user.realName" placeholder="请输入中文名称" clearable></b-input>
             </b-form-item>
-            <b-form-item label="手机号码" prop="mobile">
-              <b-input v-model="user.mobile" placeholder="请输入手机号码" clearable></b-input>
-            </b-form-item>
           </div>
           <div flex="box:mean">
-            <b-form-item label="所属组织">
-              <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+            <b-form-item label="手机号码" prop="mobile">
+              <b-input v-model="user.mobile" placeholder="请输入手机号码" clearable></b-input>
             </b-form-item>
             <b-form-item label="电子邮件" prop="email">
               <b-input v-model="user.email" placeholder="请输入邮箱" clearable></b-input>
@@ -162,19 +156,6 @@
               callback()
             } else {
               callback(new Error('登录名称重复'))
-            }
-          }).catch(() => {
-            callback(new Error('请求验证重复性出错'))
-          })
-        }
-      }
-      const validateUserCode = (rule, value, callback) => {
-        if (value.length > 0) {
-          api.oneUserCode(this.user).then(response => {
-            if (response.data.data === 0) {
-              callback()
-            } else {
-              callback(new Error('用户编码重复'))
             }
           }).catch(() => {
             callback(new Error('请求验证重复性出错'))
@@ -239,16 +220,14 @@
               return this.listQuery.size * (this.listQuery.page - 1) + row._index + 1
             }
           },
-          { title: '用户名称', slot: 'username' },
+          { title: '登录名称', slot: 'username' },
           { title: '中文名称', key: 'realName' },
-          { title: '用户编码', key: 'userCode', align: 'center' },
           { title: '用户状态', slot: 'status', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         user: null,
         ruleValidate: {
           username: [requiredRule, { validator: validateUsername, trigger: 'blur' }],
-          userCode: [requiredRule, { validator: validateUserCode, trigger: 'blur' }],
           mobile: [{ validator: validateMobile, trigger: 'blur' }],
           email: [{ validator: validateEmail, trigger: 'blur' }]
         },
@@ -257,7 +236,8 @@
     },
     filters: {
       mobileFilter (value) {
-        return value && value.length > 0 ? Decrypt(value) : ''
+        let mobile = value && value.length > 0 ? Decrypt(value) : ''
+        return mobile.length > 4 ? mobile.slice(0, mobile.length - 4) + '****' : ''
       }
     },
     computed: {
@@ -273,11 +253,16 @@
     methods: {
       /* [事件响应] */
       handTreeCurrentChange (data, node) {
+        if (this.dialogFormVisible && this.dialogStatus === 'check') { // 查询模式锁定树选择
+          node.selected = false // 取消点击节点选中并重新设置当前选中
+          this.currentTreeNode.selected = true
+          return
+        }
         this.currentTreeNode = node
+        this.listQuery.departId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
           this.user.departId = node.id
         } else {
-          this.listQuery.departId = node.id
           this.handleFilter()
         }
       },
@@ -342,7 +327,7 @@
                 this.btnLoading = false
                 this.dialogFormVisible = false
                 this.$message({ type: 'success', content: '操作成功' })
-                this.searchList()
+                this.handleFilter()
               } else {
                 this.$message({ type: 'error', content: res.data.message })
               }
@@ -388,7 +373,7 @@
         let user = { ...row }
         this.$confirm({
           title: '警告',
-          content: `确定要重置此用户的密码吗？`,
+          content: `确定要重置此用户的密码吗？<br>初始密码为：123456`,
           loading: true,
           onOk: () => {
             api.resetUserPwd(user).then(res => {
@@ -419,7 +404,6 @@
           departId: this.currentTreeNode ? this.currentTreeNode.id : '',
           username: '',
           realName: '',
-          userCode: '',
           status: this.ENUM.ENABLE,
           email: '',
           mobile: '',
@@ -441,7 +425,7 @@
               children: (node.children && node.children.map(mapper)) || []
             }
           }
-          let data = tree[0] && tree[0].code === 'top' ? mapper(tree[0]) : []
+          let data = tree[0] && tree[0].code === '10000' ? mapper(tree[0]) : []
           this.treeData.push(data)
           if (this.treeData.length > 0) {
             this.currentTreeNode = this.treeData[0]
