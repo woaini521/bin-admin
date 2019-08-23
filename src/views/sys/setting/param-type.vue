@@ -7,6 +7,9 @@
       <v-filter-item title="类别名称">
         <b-input v-model.trim="listQuery.typeName" size="small" placeholder="请输入类别名称" clearable></b-input>
       </v-filter-item>
+      <v-filter-item title="类别编码">
+        <b-input v-model.trim="listQuery.typeCode" size="small" placeholder="请输入类别编码" clearable></b-input>
+      </v-filter-item>
       <!--添加查询按钮位置-->
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
     </v-filter-bar>
@@ -17,9 +20,6 @@
     <!--中央表格-->
     <b-table slot="table" :columns="columns" :data="list" :loading="listLoading"
              stripe max-height="526" ref="table" :width="treeTableWidth">
-      <template v-slot:typeName="scope">
-        <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.typeName }}</a>
-      </template>
       <!--操作栏-->
       <template v-slot:action="scope">
         <b-button :disabled="!canModify" type="text" @click="handleModify(scope.row)" v-waves>
@@ -38,18 +38,8 @@
     <!--编辑抽屉-->
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" :title="editTitle"
               footer-hide fullscreen>
-      <!--查询内容区域-->
-      <div v-if="dialogStatus==='check'" style="width:500px;padding: 20px;">
-        <v-key-label label="类别名称">{{ type.typeName }}</v-key-label>
-        <v-key-label label="完整编码">{{ type.route }}</v-key-label>
-        <v-key-label label="类别编码">{{ type.typeCode }}</v-key-label>
-        <v-key-label label="排序编号">{{ type.sortNum }}</v-key-label>
-        <v-key-label label="描述" is-bottom>{{ type.desc }}</v-key-label>
-        <div style="padding: 10px;text-align: center;">
-          <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
-        </div>
-      </div> <!--增加编辑区域-->
-      <div v-else style="width: 880px;padding: 20px 0 0 60px;">
+      <!--增加编辑区域-->
+      <div v-if="dialogStatus!=='check'" style="width: 880px;padding: 20px 0 0 60px;">
         <!--调试用，显示id-->
         <b-form :model="type" ref="form" :rules="ruleValidate" :label-width="130">
           <div flex="box:mean">
@@ -134,10 +124,11 @@
               return this.listQuery.size * (this.listQuery.page - 1) + row._index + 1
             }
           },
-          { title: '类别名称', slot: 'typeName' },
-          { title: '完整编码', key: 'route', align: 'center' },
+          { title: '类别名称', key: 'typeName' },
           { title: '类别编码', key: 'typeCode', width: 120, align: 'center' },
+          { title: '完整编码', key: 'route', align: 'center' },
           { title: '排序编号', key: 'sortNum', width: 120, align: 'center' },
+          { title: '描述', key: 'desc', width: 300, tooltip: true },
           { title: '操作', slot: 'action', width: 180 }
         ],
         type: null,
@@ -168,6 +159,7 @@
           page: 1,
           size: 10,
           typeName: '',
+          typeCode: '',
           parentId: this.currentTreeNode ? this.currentTreeNode.id : ''
         }
         this.handleFilter()

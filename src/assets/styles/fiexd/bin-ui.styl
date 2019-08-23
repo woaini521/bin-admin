@@ -23,7 +23,7 @@
     height: calc(100% - 125px);
   }
 }
-// 2: 按钮间隔
+// 2: 按钮间隔=》可同步至bin-ui
 .bin-button + .bin-button {
   margin-left: 10px;
 }
@@ -64,7 +64,11 @@
   }
 }
 .bin-table-cell {
-  padding: 0 6px;
+  padding: 0 8px;
+}
+//  表格内部的tooltip =》可同步至bin-ui
+.bin-table-cell-tooltip .bin-tooltip-rel {
+  vertical-align: middle;
 }
 .bin-table {
   .bin-table-header th, .bin-table-fixed-header th {
@@ -81,13 +85,7 @@
   }
 }
 
-.bin-table-fixed-right::before, .bin-table-fixed::before {
-  display: none;
-}
-.bin-table-fixed-right {
-  box-shadow: 0 0 10px rgba(0, 0, 0, .12)
-}
-
+//表格内部的多选框间距=》可同步至bin-ui
 .bin-table-cell.bin-table-cell-with-selection .bin-checkbox {
   margin-right: 0;
 }

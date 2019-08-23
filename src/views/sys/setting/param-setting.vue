@@ -7,8 +7,8 @@
       <v-filter-item title="参数名称">
         <b-input v-model.trim="listQuery.confName" size="small" placeholder="请输入参数名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="参数名称">
-        <b-input v-model.trim="listQuery.confName" size="small" placeholder="请输入参数名称" clearable></b-input>
+      <v-filter-item title="参数编码">
+        <b-input v-model.trim="listQuery.confCode" size="small" placeholder="请输入参数编码" clearable></b-input>
       </v-filter-item>
       <!--添加查询按钮位置-->
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
@@ -23,7 +23,7 @@
       <template v-slot:confName="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.confName }}</a>
       </template>
-      <!--取值模式-->
+      <!--取值类型-->
       <template v-slot:valueMode="scope">
         <b-tag :type="scope.row.valueMode|valueModeStyleFilter" size="medium">
           {{ valueModeMap[scope.row.valueMode] }}
@@ -52,12 +52,10 @@
         <v-key-label label="参数名称" is-half>{{ conf.confName }}</v-key-label>
         <v-key-label label="参数编码" is-half is-first>{{ conf.confCode }}</v-key-label>
         <v-key-label label="完整编码" is-half>{{ conf.routeCode }}</v-key-label>
-        <v-key-label label="取值模式" is-half is-first>{{ valueModeMap[conf.valueMode] }}</v-key-label>
+        <v-key-label label="取值类型" is-half is-first>{{ valueModeMap[conf.valueMode] }}</v-key-label>
         <v-key-label label="排序编号" is-half>{{ conf.sortNum }}</v-key-label>
-        <v-key-label label="当前值" is-half is-first>{{ conf.confValue }}</v-key-label>
-        <v-key-label label="内部值" is-half>{{ conf.realValue }}</v-key-label>
-        <v-key-label label="取值范围" is-half is-first>{{ conf.valueRange }}</v-key-label>
-        <v-key-label label="内部取值范围" is-half>{{ conf.realValueRange }}</v-key-label>
+        <v-key-label label="参数值" is-half is-first>{{ conf.confValue }}</v-key-label>
+        <v-key-label label="取值范围" is-half>{{ conf.valueRange }}</v-key-label>
         <v-key-label label="描述" is-bottom>{{ conf.desc }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
           <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
@@ -83,7 +81,7 @@
             </b-form-item>
           </div>
           <div flex="box:mean">
-            <b-form-item label="取值模式" prop="valueMode" class="bin-form-item-required">
+            <b-form-item label="取值类型" prop="valueMode" class="bin-form-item-required">
               <b-select v-model="conf.valueMode" size="large">
                 <b-option v-for="item in valueModeOptions" :key="item.value" :value="item.value">
                   {{ item.label }}
@@ -97,15 +95,15 @@
           <b-form-item label="描述" prop="desc">
             <b-input v-model="conf.desc" placeholder="请输入描述" type="textarea"></b-input>
           </b-form-item>
-          <template v-if="conf.valueMode!==ENUM.STRING">
-            <b-divider align="left">{{ valueModeMap[conf.valueMode] }}</b-divider>
+          <template v-if="conf.valueMode===ENUM.RADIO||conf.valueMode===ENUM.CHECKBOX">
+            <b-divider align="left">{{ valueModeMap[conf.valueMode] }}参数</b-divider>
             <!--遍历值缓存-->
             <div flex="box:last" v-for="(item,index) in conf.bufferValue" :key="index">
-              <b-form-item label="显示值">
-                <b-input v-model="item.label" placeholder="请输入显示值" size="small" clearable></b-input>
+              <b-form-item label="显示">
+                <b-input v-model="item.label" placeholder="请输入显示文本" size="small" clearable></b-input>
               </b-form-item>
-              <b-form-item label="内部值">
-                <b-input v-model="item.value" placeholder="请输入内部值" size="small" clearable></b-input>
+              <b-form-item label="值">
+                <b-input v-model="item.value" placeholder="请输入值" size="small" clearable></b-input>
               </b-form-item>
               <div style="width: 96px;padding-left: 20px;">
                 <b-button type="danger" size="small" icon="ios-close-circle-outline"
@@ -146,7 +144,7 @@
             <param-conf :value-mode="conf.valueMode" :options="conf.bufferValue" v-model="conf.realValue"></param-conf>
           </span>
         </div>
-        <div class="item"><span>参数说明：</span><span>{{ conf.desc}}</span></div>
+        <div class="item"><span>参数描述：</span><span>{{ conf.desc}}</span></div>
       </div>
       <div slot="footer" style="text-align: right;">
         <b-button type="primary" v-waves @click="confSave" :loading="btnLoading">保存</b-button>
@@ -161,7 +159,7 @@
   import permission from '../../../mixins/permission'
   import { getValueMode } from '../../../api/enum'
   import * as api from '../../../api/management/paramConf'
-  import ParamConf from './param-conf'
+  import ParamConf from '../components/param-conf'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
   export default {
@@ -215,9 +213,8 @@
           { title: '参数名称', slot: 'confName' },
           { title: '参数编码', key: 'confCode' },
           { title: '完整编码', key: 'routeCode' },
-          { title: '排序编号', key: 'sortNum', width: 100, align: 'center' },
-          { title: '取值模式', slot: 'valueMode', width: 120, align: 'center' },
-          { title: '当前值', key: 'confValue', width: 180, align: 'center' },
+          { title: '取值类型', slot: 'valueMode', width: 120, align: 'center' },
+          { title: '参数值', key: 'confValue', width: 200, align: 'center', tooltip: true },
           { title: '操作', slot: 'action', width: 180 }
         ],
         conf: null,
@@ -227,12 +224,12 @@
         },
         settingVisible: false,
         checkboxList: [],
-        valueModeMap: { '1': '字符串', '2': '内部单选', '3': '内部多选' } // 默认值
+        valueModeMap: { '0': '数值', '1': '字符串', '2': '单选', '3': '多选' } // 默认值
       }
     },
     filters: {
       valueModeStyleFilter (value) {
-        let map = { '1': 'info', '2': 'primary', '3': 'success' }
+        let map = { '0': 'warning', '1': 'info', '2': 'primary', '3': 'success' }
         return map[value]
       }
     },
@@ -245,7 +242,7 @@
         return ret
       },
       ENUM () {
-        return { STRING: '1', RADIO: '2', CHECKBOX: '3' }
+        return { NUM: '0', STRING: '1', RADIO: '2', CHECKBOX: '3' }
       }
     },
     created () {
@@ -298,6 +295,7 @@
       confSave () {
         // 如果是字符串模式，则参数值需要同步至内部值
         switch (this.conf.valueMode) {
+          case this.ENUM.NUM:
           case this.ENUM.STRING:
             this.conf.confValue = this.conf.realValue
             break
@@ -375,7 +373,7 @@
         if (this.checkBufferValueNotEmpty()) {
           this.conf.bufferValue.push({ label: '', value: '' })
         } else {
-          this.$message({ content: '显示值和内部值必填', type: 'danger' })
+          this.$message({ content: '显示文本和值必填', type: 'danger' })
         }
       },
       // 删除一行
@@ -431,7 +429,7 @@
           typeId: this.currentTreeNode ? this.currentTreeNode.id : '',
           confName: '',
           confCode: '',
-          confValue: '', // 参数值，即当前值，存储显示值，字符串时需要同步显示值和实际值
+          confValue: '', // 参数值，即参数值，存储显示值，字符串时需要同步显示值和实际值
           realValue: '', // 内部值,及实际存储数据库中的值，字符串模式时需要同步至实际值
           valueMode: this.ENUM.STRING, // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
           valueRange: '', // 取值范围，及显示值

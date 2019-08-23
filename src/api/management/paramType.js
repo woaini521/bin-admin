@@ -21,6 +21,7 @@ export function getTypeList (query) {
       size: query.size,
       page: query.page - 1,
       typeName: query.typeName,
+      typeCode: query.typeCode,
       parentId: query.parentId,
       sort: 'sortNum,asc'
     }

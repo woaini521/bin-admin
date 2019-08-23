@@ -10,6 +10,7 @@ export function getRoleList (query) {
       size: query.size,
       page: query.page - 1,
       name: query.name,
+      code: query.code,
       sort: 'createDate,desc'
     }
   })

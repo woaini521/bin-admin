@@ -140,7 +140,7 @@
   import { isEmail, isTelCode } from '../../../utils/validate'
   import { Decrypt, Encrypt } from '../../../utils/secret'
   import { deepCopy } from '../../../utils/assist'
-  import RoleChoose from '../auth/role-choose'
+  import RoleChoose from '../components/role-choose'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 

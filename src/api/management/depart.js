@@ -2,7 +2,7 @@
 import request from '../api_request'
 
 /* 获取部门树 */
-export function getDeptTree (departCode = 'top') {
+export function getDeptTree (departCode = '10000') {
   return request({
     url: '/management/depart/tree',
     method: 'get',
@@ -18,7 +18,7 @@ export function getDeptList (query) {
   data.append('size', query.size)
   data.append('page', query.page - 1)
   data.append('departName', query.departName)
-  data.append('delFlag', query.delFlag)
+  data.append('status', query.status)
   data.append('parentId', query.parentId)
   data.append('sort', 'sortNum,asc')
   data.append('sort', 'createDate,desc')
@@ -31,54 +31,50 @@ export function getDeptList (query) {
 
 /* 新增部门信息 */
 export function createDept (depart) {
-  const data = {
-    parentId: depart.parentId,
-    departName: depart.departName,
-    departCode: depart.departCode,
-    departKind: depart.departKind,
-    regionId: depart.regionId,
-    sortNum: depart.sortNum,
-    unifiedCode: depart.unifiedCode,
-    fullName: depart.fullName,
-    remark: depart.remark
-  }
   return request({
     url: '/management/depart/create',
     method: 'post',
-    data
+    data: {
+      parentId: depart.parentId,
+      departName: depart.departName,
+      departKind: depart.departKind,
+      regionId: depart.regionId,
+      sortNum: depart.sortNum,
+      unifiedCode: depart.unifiedCode,
+      fullName: depart.fullName,
+      remark: depart.remark
+    }
   })
 }
 
 /* 修改部门信息 */
 export function modifyDept (depart) {
-  const data = {
-    id: depart.id,
-    parentId: depart.parentId,
-    departName: depart.departName,
-    departCode: depart.departCode,
-    departKind: depart.departKind,
-    regionId: depart.regionId,
-    sortNum: depart.sortNum,
-    unifiedCode: depart.unifiedCode,
-    fullName: depart.fullName,
-    remark: depart.remark
-  }
   return request({
     url: '/management/depart/modify',
     method: 'post',
-    data
+    data: {
+      id: depart.id,
+      parentId: depart.parentId,
+      departName: depart.departName,
+      departKind: depart.departKind,
+      regionId: depart.regionId,
+      sortNum: depart.sortNum,
+      unifiedCode: depart.unifiedCode,
+      fullName: depart.fullName,
+      remark: depart.remark
+    }
   })
 }
 
 /* 启用禁用部门信息 */
-export function changeDelFlag (depart) {
+export function changeStatus (depart) {
   let data = [depart.id]
   return request({
-    url: '/management/depart/changeDelFlag',
+    url: '/management/depart/changeStatus',
     method: 'post',
     data,
     params: {
-      yn: depart.delFlag
+      status: depart.status
     }
   })
 }

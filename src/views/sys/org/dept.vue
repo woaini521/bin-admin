@@ -8,7 +8,7 @@
         <b-input v-model.trim="listQuery.departName" size="small" placeholder="请输入部门名称" clearable></b-input>
       </v-filter-item>
       <v-filter-item title="禁用状态" width="160px">
-        <b-switch size="large" v-model="listQuery.delFlag" :true-value="ENUM.Y" :false-value="ENUM.N"
+        <b-switch size="large" v-model="listQuery.status" :true-value="ENUM.DISABLE" :false-value="ENUM.ENABLE"
                   @on-change="handleFilter">
           <span slot="open">显示</span>
           <span slot="close">隐藏</span>
@@ -28,10 +28,10 @@
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.departName }}</a>
       </template>
       <!--状态-->
-      <template v-slot:delFlag="scope">
-        <b-switch v-model="scope.row.delFlag" :true-value="ENUM.N" :false-value="ENUM.Y"
+      <template v-slot:status="scope">
+        <b-switch v-model="scope.row.status" :true-value="ENUM.ENABLE" :false-value="ENUM.DISABLE"
                   inactive-color="#ff4949" size="large"
-                  @on-change="handleChangeDelFlag(scope.row)">
+                  @on-change="handleChangeStatusFlag(scope.row)">
           <span slot="open">启用</span>
           <span slot="close">禁用</span>
         </b-switch>
@@ -39,12 +39,12 @@
       <!--操作栏-->
       <template v-slot:action="scope">
         <!--如果可编辑且是禁用（可删除即为禁用）状态下不可编辑-->
-        <b-button :disabled="canModify && scope.row.delFlag===ENUM.Y"
+        <b-button :disabled="canModify && scope.row.status===ENUM.DISABLE"
                   type="text" @click="handleModify(scope.row)" v-waves>
           修改
         </b-button>
         <!--是否有删除键-->
-        <template v-if="canRemove && scope.row.delFlag===ENUM.Y">
+        <template v-if="canRemove && scope.row.status===ENUM.DISABLE">
           <b-divider type="vertical"></b-divider>
           <b-button type="text" v-waves style="color:red;" @click="handleRemove(scope.row)">删除</b-button>
         </template>
@@ -57,12 +57,12 @@
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
       <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;">
-        <v-key-label label="部门名称" label-width="150px" is-half is-first>{{ depart.departName }}</v-key-label>
-        <v-key-label label="部门编码" is-half>{{ depart.departCode }}</v-key-label>
-        <v-key-label label="部门类型" label-width="150px" is-half is-first>{{ depart.departKind }}</v-key-label>
-        <v-key-label label="排序编号" is-half>{{ depart.sortNum }}</v-key-label>
-        <v-key-label label="统一社会信用代码" label-width="150px" is-half is-first>{{ depart.unifiedCode }}</v-key-label>
-        <v-key-label label="部门全称" is-half>{{ depart.fullName }}</v-key-label>
+        <v-key-label label="部门名称" label-width="150px">{{ depart.departName }}</v-key-label>
+        <v-key-label label="上级部门" label-width="150px">{{ currentTreeNode.title }}</v-key-label>
+        <v-key-label label="部门类型" label-width="150px">{{ depart.departKind }}</v-key-label>
+        <v-key-label label="排序编号" label-width="150px">{{ depart.sortNum }}</v-key-label>
+        <v-key-label label="统一社会信用代码" label-width="150px">{{ depart.unifiedCode }}</v-key-label>
+        <v-key-label label="部门全称" label-width="150px">{{ depart.fullName }}</v-key-label>
         <v-key-label label="备注" label-width="150px" is-bottom>{{ depart.remark }}</v-key-label>
         <div style="padding: 10px;text-align: center;">
           <b-button v-waves @click="dialogFormVisible=false">返 回</b-button>
@@ -72,37 +72,32 @@
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">
         <!--调试用，显示id-->
         <b-form :model="depart" ref="form" :rules="ruleValidate" :label-width="130">
+          <b-form-item label="上级部门">
+            <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+          </b-form-item>
           <div flex="box:mean">
             <b-form-item label="部门名称" prop="departName">
               <b-input v-model="depart.departName" placeholder="请输入部门名称" clearable></b-input>
             </b-form-item>
-            <b-form-item label="统一社会信用代码" prop="unifiedCode">
-              <b-input v-model="depart.unifiedCode" placeholder="请输入统一社会信用代码" clearable></b-input>
-            </b-form-item>
-          </div>
-          <div flex="box:mean">
-            <b-form-item label="部门编码" prop="departCode">
-              <b-input v-model="depart.departCode" placeholder="请输入部门编码" clearable></b-input>
-            </b-form-item>
-            <b-form-item label="部门全称" prop="fullName">
-              <b-input v-model="depart.fullName" placeholder="请输入部门全称" clearable></b-input>
-            </b-form-item>
-          </div>
-          <div flex="box:mean">
-            <b-form-item label="上级部门">
-              <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
-            </b-form-item>
-            <b-form-item label="行政区划代码" prop="regionId">
-              <b-input v-model="depart.regionId" placeholder="请输入行政区划代码" clearable></b-input>
-            </b-form-item>
-          </div>
-          <div flex="box:mean">
             <b-form-item label="部门类型" prop="departKind">
               <b-select v-model="depart.departKind">
                 <!--这里暂时是直接存储字符串值到后台，故不是key-value枚举值-->
                 <b-option value="机构">机构</b-option>
                 <b-option value="一般组织">一般组织</b-option>
               </b-select>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="部门全称" prop="fullName">
+              <b-input v-model="depart.fullName" placeholder="请输入部门全称" clearable></b-input>
+            </b-form-item>
+            <b-form-item label="统一社会信用代码" prop="unifiedCode">
+              <b-input v-model="depart.unifiedCode" placeholder="请输入统一社会信用代码" clearable></b-input>
+            </b-form-item>
+          </div>
+          <div flex="box:mean">
+            <b-form-item label="行政区划代码" prop="regionId">
+              <b-input v-model="depart.regionId" placeholder="请输入行政区划代码" clearable></b-input>
             </b-form-item>
             <b-form-item label="排序编号" prop="sortNum">
               <b-input-number :min="0" v-model="depart.sortNum" style="width: 100%;"></b-input-number>
@@ -125,7 +120,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/depart'
-  import { getYn } from '../../../api/enum'
+  import { getDeptStatus } from '../../../api/enum'
   import { verifyUnifiedCode } from '../../../utils/validate'
 
   // 非空字段提示
@@ -142,19 +137,6 @@
               callback()
             } else {
               callback(new Error('部门名称重复'))
-            }
-          }).catch(() => {
-            callback(new Error('请求验证重复性出错'))
-          })
-        }
-      }
-      const validateDepartCode = (rule, value, callback) => {
-        if (value.length > 0) {
-          api.oneDeptCode(this.depart).then(response => {
-            if (response.data.data === 0) {
-              callback()
-            } else {
-              callback(new Error('部门编码重复'))
             }
           }).catch(() => {
             callback(new Error('请求验证重复性出错'))
@@ -182,10 +164,24 @@
           } else if (value === '00000000000000000X') {
             callback(new Error('一般组织不能填写此代码'))
           } else {
-            callback()
+            if (verifyUnifiedCode(value)) {
+              api.oneDeptUnified(this.depart)
+                .then(response => {
+                  if (response.data.data === 0) {
+                    callback()
+                  } else {
+                    callback(new Error('部门编码重复'))
+                  }
+                })
+                .catch(() => {
+                  callback(new Error('请求验证重复性出错'))
+                })
+            } else {
+              callback(new Error('请输入正确的统一社会信用代码'))
+            }
           }
         } else {
-          if (value === '00000000000000000X' || value.length === 0) {
+          if (value.length === 0 || value === '00000000000000000X') {
             callback()
           } else {
             if (verifyUnifiedCode(value)) {
@@ -223,18 +219,15 @@
               return this.listQuery.size * (this.listQuery.page - 1) + row._index + 1
             }
           },
-          { title: '类别名称', slot: 'departName' },
-          { title: '完整编码', key: 'departCode' },
+          { title: '部门名称', slot: 'departName' },
           { title: '部门类型', key: 'departKind', width: 120, align: 'center' },
           { title: '部门全称', key: 'fullName' },
-          { title: '排序编号', key: 'sortNum', width: 80, align: 'center' },
-          { title: '状态', slot: 'delFlag', width: 180, align: 'center' },
+          { title: '状态', slot: 'status', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         depart: null,
         ruleValidate: {
           departName: [requiredRule, { validator: validateDepartName, trigger: 'blur' }],
-          departCode: [requiredRule, { validator: validateDepartCode, trigger: 'blur' }],
           departKind: [
             { required: true, message: '必填项', trigger: 'change' },
             { validator: validateDepartKind, trigger: 'change' }
@@ -242,27 +235,32 @@
           fullName: [{ validator: validateFullName, trigger: 'blur' }],
           unifiedCode: [{ validator: validateUnified, trigger: 'blur' }]
         },
-        ynMap: { 'N': '否', 'Y': '是' } // 默认值这里Y是可以删除，可删除状态及为禁用
+        statusMap: { 'D': '禁用', 'Y': '启用' } // 默认值这里Y是可以删除，可删除状态及为禁用
       }
     },
     computed: {
       ENUM () {
-        return { N: 'N', Y: 'Y', ORG: '机构', COMMON: '一般组织' } // 常量比对键值对
+        return { DISABLE: 'D', ENABLE: 'Y', ORG: '机构', COMMON: '一般组织' } // 常量比对键值对
       }
     },
     created () {
-      this.getYnEnum()
+      this.getDeptStatusEnum()
       this.resetDept()
       this.initTree()
     },
     methods: {
       /* [事件响应] */
       handTreeCurrentChange (data, node) {
+        if (this.dialogFormVisible && this.dialogStatus === 'check') { // 查询模式锁定树选择
+          node.selected = false // 取消点击节点选中并重新设置当前选中
+          this.currentTreeNode.selected = true
+          return
+        }
         this.currentTreeNode = node
+        this.listQuery.parentId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
           this.depart.parentId = node.id
         } else {
-          this.listQuery.parentId = node.id
           this.handleFilter()
         }
       },
@@ -272,7 +270,7 @@
           page: 1,
           size: 10,
           departName: '',
-          delFlag: this.ENUM.N,
+          status: this.ENUM.ENABLE,
           parentId: this.currentTreeNode ? this.currentTreeNode.id : ''
         }
         this.handleFilter()
@@ -294,12 +292,11 @@
         this.openEditPage('check')
       },
       // 单个启用禁用
-      handleChangeDelFlag (row) {
+      handleChangeStatusFlag (row) {
         let depart = { ...row }
-        api.changeDelFlag(depart).then(res => {
+        api.changeStatus(depart).then(res => {
           if (res.data.code === '0') {
             this.$message({ type: 'success', content: '操作成功' })
-            this.initTree()
           } else {
             this.$message({ type: 'danger', content: '操作失败' })
           }
@@ -337,7 +334,7 @@
                 this.btnLoading = false
                 this.dialogFormVisible = false
                 this.$message({ type: 'success', content: '操作成功' })
-                this.searchList()
+                this.initTree()
               } else {
                 this.$message({ type: 'error', content: res.data.message })
               }
@@ -347,10 +344,10 @@
       },
       /* [数据接口] */
       // 通用枚举
-      getYnEnum () {
-        getYn().then(res => {
+      getDeptStatusEnum () {
+        getDeptStatus().then(res => {
           if (res.status === 200) {
-            this.ynMap = res.data.data
+            this.statusMap = res.data.data
           }
         })
       },
@@ -382,7 +379,7 @@
               children: (node.children && node.children.map(mapper)) || []
             }
           }
-          let data = tree[0] && tree[0].code === 'top' ? mapper(tree[0]) : []
+          let data = tree[0] && tree[0].code === '10000' ? mapper(tree[0]) : []
           this.treeData.push(data)
           if (this.treeData.length > 0) {
             this.currentTreeNode = this.treeData[0]

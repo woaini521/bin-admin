@@ -227,14 +227,16 @@
     methods: {
       /* [事件响应] */
       handTreeCurrentChange (data, node) {
+        if (this.dialogFormVisible && this.dialogStatus === 'check') { // 查询模式锁定树选择
+          node.selected = false // 取消点击节点选中并重新设置当前选中
+          this.currentTreeNode.selected = true
+          return
+        }
+        this.currentTreeNode = node
+        this.listQuery.parentId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
-          if (this.dialogStatus !== 'check') {
-            this.currentTreeNode = node
-            this.menu.parentId = node.id
-          }
+          this.menu.parentId = node.id
         } else {
-          this.currentTreeNode = node
-          this.listQuery.parentId = node.id
           this.handleFilter()
         }
       },

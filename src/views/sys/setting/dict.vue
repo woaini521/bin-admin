@@ -2,11 +2,11 @@
   <v-table-layout>
     <!--查询条件-->
     <v-filter-bar slot="filter">
-      <v-filter-item title="字典组名称">
-        <b-input v-model.trim="listQuery.groupName" size="small" placeholder="请输入字典组名称" clearable></b-input>
+      <v-filter-item title="字典名称">
+        <b-input v-model.trim="listQuery.groupName" size="small" placeholder="请输入字典名称" clearable></b-input>
       </v-filter-item>
-      <v-filter-item title="字典组编码">
-        <b-input v-model.trim="listQuery.groupCode" size="small" placeholder="请输入字典组编码" clearable></b-input>
+      <v-filter-item title="字典编码">
+        <b-input v-model.trim="listQuery.groupCode" size="small" placeholder="请输入字典编码" clearable></b-input>
       </v-filter-item>
       <!--添加查询按钮位置-->
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
@@ -20,13 +20,7 @@
              stripe max-height="526" ref="table" :width="tableWidth">
       <!--字典类型-->
       <template v-slot:dictType="scope">
-        <span v-if="scope.row.dictType===ENUM.SYS" style="color: #1890ff;">{{ dictTypeMap[scope.row.dictType] }}</span>
-        <span v-else style="color: #ff9600;">{{ dictTypeMap[scope.row.dictType] }}</span>
-      </template>
-      <!--状态-->
-      <template v-slot:delFlag="scope">
-        <b-tag v-if="scope.row.delFlag==='N'" type="primary" size="medium">启用</b-tag>
-        <b-tag v-else type="danger" size="medium">禁用</b-tag>
+        {{ dictTypeMap[scope.row.dictType] }}
       </template>
       <!--操作栏-->
       <template v-slot:action="scope">
@@ -81,7 +75,7 @@
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/management/dict'
   import { getDictType } from '../../../api/enum'
-  import DictItem from './dict-item'
+  import DictItem from '../components/dict-item'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 
@@ -134,7 +128,6 @@
           { title: '字典编码', key: 'groupCode' },
           { title: '字典名称', key: 'groupName' },
           { title: '字典类型', slot: 'dictType', width: 120, align: 'center' },
-          { title: '状态', slot: 'delFlag', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
         ],
         dict: null,

@@ -1,4 +1,5 @@
 // 参数设置组件，根据传入的类型去生成不同的组件
+const NUM = '0'
 const STRING = '1'
 const RADIO = '2'
 const CHECKBOX = '3'
@@ -7,7 +8,8 @@ export default {
   data () {
     return {
       currentValue: this.value,
-      items: []
+      items: [],
+      number: 0
     }
   },
   props: {
@@ -28,41 +30,50 @@ export default {
   },
   render (h) {
     let node
-    if (this.valueMode === STRING) { // 如果是字符串则渲染输入框
-      node = h('b-input', {
-        props: {
-          value: this.value,
-          placeholder: '请输入参数值',
-          clearable: true
-        },
-        on: { input: this.handleInput }
-      })
-    } else if (this.valueMode === RADIO) { // 单选框组件
-      node = h('b-radio-group', {
+    switch (this.valueMode) {
+      case NUM:
+        node = h('b-input-number', {
           props: {
-            value: this.value
+            value: this.number,
+            size: 'large'
           },
-          on: { input: this.radioChange }
-        },
-        this.options.map((item) => {
-          return h('b-radio', {
-            props: { label: item.value }
-          }, [item.label])
+          on: { input: this.handleInputNum }
         })
-      )
-    } else { // 多选框组件
-      node = h('b-checkbox-group', {
+        break
+      case STRING:
+        node = h('b-input', {
           props: {
-            value: this.items
+            value: this.value,
+            placeholder: '请输入参数值',
+            clearable: true
           },
-          on: { input: this.checkboxChange }
-        },
-        this.options.map((item) => {
-          return h('b-checkbox', {
-            props: { label: item.value }
-          }, [item.label])
+          on: { input: this.handleInput }
         })
-      )
+        break
+      case RADIO:
+        node = h('b-radio-group', {
+            props: { value: this.value },
+            on: { input: this.radioChange }
+          },
+          this.options.map((item) => {
+            return h('b-radio', {
+              props: { label: item.value }
+            }, [item.label])
+          })
+        )
+        break
+      case CHECKBOX:
+        node = h('b-checkbox-group', {
+            props: { value: this.items },
+            on: { input: this.checkboxChange }
+          },
+          this.options.map((item) => {
+            return h('b-checkbox', {
+              props: { label: item.value }
+            }, [item.label])
+          })
+        )
+        break
     }
     return node
   },
@@ -71,11 +82,16 @@ export default {
       handler (val) {
         // 缓存选中数组
         this.items = this.valueMode === CHECKBOX ? val.split(',') : []
+        this.number = this.valueMode === NUM ? Number(this.value) : 0
       },
       immediate: true
     }
   },
   methods: {
+    // 输入框输入
+    handleInputNum (value) {
+      this.$emit('input', value.toString())
+    },
     // 输入框输入
     handleInput (value) {
       this.$emit('input', value)

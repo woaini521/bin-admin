@@ -1,10 +1,17 @@
 // 所有枚举值请求
 import request from './api_request'
 
-// 通用yes no 枚举
+// 用户枚举
 export function getUserStatus () {
   return request.get('/management/enum/commStatus', {
     type: 'init'
+  })
+}
+
+// 部门枚举
+export function getDeptStatus () {
+  return request.get('/management/enum/commStatus', {
+    type: 'norm'
   })
 }
 

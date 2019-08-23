@@ -3,7 +3,10 @@
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="角色名称">
-        <b-input v-model.trim="listQuery.name" size="small" placeholder="角色名称" clearable></b-input>
+        <b-input v-model.trim="listQuery.name" size="small" placeholder="请输入角色名称" clearable></b-input>
+      </v-filter-item>
+      <v-filter-item title="角色编码">
+        <b-input v-model.trim="listQuery.code" size="small" placeholder="请输入角色编码" clearable></b-input>
       </v-filter-item>
       <!--添加查询按钮位置-->
       <v-filter-item @on-search="handleFilter" @on-reset="resetQuery"></v-filter-item>
@@ -101,8 +104,8 @@
   import permission from '../../../mixins/permission'
   import { getRoleType } from '../../../api/enum'
   import * as api from '../../../api/management/role'
-  import RoleChoose from './role-choose'
-  import RoleAuth from './role-auth'
+  import RoleChoose from '../components/role-choose'
+  import RoleAuth from '../components/role-auth'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 
@@ -190,7 +193,8 @@
         this.listQuery = {
           page: 1,
           size: 10,
-          name: ''
+          name: '',
+          code: ''
         }
       },
       // 查看按钮事件
