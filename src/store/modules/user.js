@@ -58,7 +58,7 @@ export default {
             commit('SET_ROLES', result.data.roleCodes)
             commit('SET_INFO', result.data)
             resolve(response)
-          } else if (result.code === '403') { // 如果是403 即为无效的token则重定向到login页面
+          } else { // 如果是403 即为无效的token则重定向到login页面
             reject(result)
           }
         }).catch(error => {

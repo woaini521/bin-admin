@@ -172,9 +172,9 @@
       }
     },
     computed: {
-      ...mapGetters(['userInfo']),
+      ...mapGetters(['roles']),
       isAdmin () {
-        return this.userInfo.roleCodes.includes('ROLE_ADMIN')
+        return this.roles.includes('ROLE_ADMIN')
       },
       roleTypeOptions () {
         let ret = []

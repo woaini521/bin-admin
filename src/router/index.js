@@ -73,15 +73,12 @@ router.beforeEach((to, from, next) => {
             })
           })
           .catch(err => {
-            if (err.code === '403') {
-              // 无效token则登出并重定向到登录页面
-              store.dispatch('logout').then(() => {
-                next({ name: 'login', query: { redirect: to.fullPath } })
-                BinUI.LoadingBar.done()
-              })
-            } else {
-              next({ name: 'login' })
-            }
+            util.log.danger(err.message)
+            // 无效token则登出并重定向到登录页面
+            store.dispatch('logout').then(() => {
+              next({ name: 'login', query: { redirect: to.fullPath } })
+              BinUI.LoadingBar.done()
+            })
           })
       }
     }

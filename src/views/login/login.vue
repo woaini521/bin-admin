@@ -119,7 +119,7 @@
             this.$router.push('/')
           })
         } else {
-          this.$message({ content: '登录失败请检查服务器', type: 'danger' })
+          this.$message({ content: res.data.message, type: 'danger' })
         }
       },
       // 登录失败
