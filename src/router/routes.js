@@ -1,4 +1,5 @@
 import layout from '../layout/layout'
+import sys from './modules/sys'
 import org from './modules/org'
 import auth from './modules/auth'
 import logs from './modules/logs'
@@ -18,7 +19,7 @@ import setting from './modules/setting'
   }
  **/
 export const asyncRouterMap = [
-  org, auth, logs, setting,
+  sys, org, auth, setting,
   { path: '*', redirect: '/404', hidden: true }
 ]
 

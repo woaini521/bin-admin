@@ -158,7 +158,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import { getValueMode } from '../../../api/enum'
-  import * as api from '../../../api/management/paramConf'
+  import * as api from '../../../api/sys/paramConf'
   import ParamConf from '../components/param-conf'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }

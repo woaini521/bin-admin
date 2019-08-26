@@ -74,7 +74,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import * as api from '../../../api/management/paramType'
+  import * as api from '../../../api/sys/paramType'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
 

@@ -25,7 +25,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import * as api from '../../../api/management/role'
+  import * as api from '../../../api/sys/role'
 
   export default {
     name: 'role-choose',

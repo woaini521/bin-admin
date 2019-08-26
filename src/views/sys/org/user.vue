@@ -134,8 +134,8 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import { getDeptTree } from '../../../api/management/depart'
-  import * as api from '../../../api/management/userManage'
+  import { getDeptTree } from '../../../api/sys/depart'
+  import * as api from '../../../api/sys/userManage'
   import { getUserStatus } from '../../../api/enum'
   import { isEmail, isTelCode } from '../../../utils/validate'
   import { Decrypt, Encrypt } from '../../../utils/secret'

@@ -1,30 +1,33 @@
 import { asyncRouterMap, constantRouterMap } from '../../router/routes'
+import path from 'path'
 
 /**
  * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除,这里暂时通过这种方式获取
  *
  * @param functions 所有用户路由权限列表
  * @param  route 路由
- * @param parentPath
+ * @param basePath
  * @returns {boolean}
  */
-function hasPermission (functions, route, parentPath = '') {
+function hasPermission (functions, route, basePath = '') {
   if (route.meta && route.meta.roles) {
     return true
   } else {
-    const tempPath = parentPath.length > 0 ? parentPath + '/' + route.path : route.path
+    const tempPath = path.resolve(basePath, route.path)
+    console.log(tempPath)
     return functions.indexOf(tempPath) > -1
   }
 }
 
-function filterAsyncRoutes (routes, functions, parentPath = '') {
+function filterAsyncRoutes (routes, functions, basePath = '') {
   const res = []
   routes.forEach(route => {
     const tmp = { ...route }
-    if (hasPermission(functions, tmp, parentPath)) {
+    if (hasPermission(functions, tmp, basePath)) {
       // console.log(`匹配[${parentPath.length === 0 ? '父级路由' : '子路由'}] ${tmp.path} 路由成功`)
+      const tempPath = path.resolve(basePath, tmp.path)
       if (tmp.children) {
-        tmp.children = filterAsyncRoutes(tmp.children, functions, tmp.path)
+        tmp.children = filterAsyncRoutes(tmp.children, functions, tempPath)
       }
       if (!tmp.children || tmp.children.length > 0) {
         res.push(tmp)

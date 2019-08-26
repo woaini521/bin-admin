@@ -45,7 +45,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import * as api from '../../../api/management/sysLog'
+  import * as api from '../../../api/sys/sysLog'
 
   export default {
     name: 'SysLog',

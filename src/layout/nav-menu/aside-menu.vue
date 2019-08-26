@@ -24,7 +24,7 @@
 
     <div v-if="asideMenu.length===0" class="no-aside-menu" flex="dir:top main:center cross:center">
       <b-icon name="ios-laptop"></b-icon>
-      <div>没有侧栏菜单</div>
+      <div v-show="sidebar">没有侧栏菜单</div>
     </div>
   </div>
 </template>

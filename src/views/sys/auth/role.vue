@@ -103,7 +103,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import { getRoleType } from '../../../api/enum'
-  import * as api from '../../../api/management/role'
+  import * as api from '../../../api/sys/role'
   import RoleChoose from '../components/role-choose'
   import RoleAuth from '../components/role-auth'
   import { mapGetters } from 'vuex'
@@ -280,7 +280,6 @@
         getRoleType().then(res => {
           if (res.status === 200) {
             this.roleTypeMap = res.data.data
-            console.log(res.data.data)
           }
         })
       },

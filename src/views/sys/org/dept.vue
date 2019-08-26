@@ -119,7 +119,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import * as api from '../../../api/management/depart'
+  import * as api from '../../../api/sys/depart'
   import { getDeptStatus } from '../../../api/enum'
   import { verifyUnifiedCode } from '../../../utils/validate'
 

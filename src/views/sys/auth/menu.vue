@@ -162,7 +162,7 @@
 <script>
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
-  import * as api from '../../../api/management/menu'
+  import * as api from '../../../api/sys/menu'
   import { getYn, getMenuType } from '../../../api/enum'
   import { validateRoutePath } from '../../../utils/validate'
   import { deepCopy } from '../../../utils/assist'
