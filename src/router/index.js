@@ -56,9 +56,6 @@ router.beforeEach((to, from, next) => {
             //   '/setting', '/setting/dict', '/setting/paramType', '/setting/paramSetting'
             // ]
             const functions = res.data.data.functions || []
-            util.log.primary('>>>>>>>functions>>>>>>>')
-            util.log.print(functions)
-            util.log.success('>>>>>>>functions>>>>>>>')
             // 根据用户角色获取用户菜单路由,如线上项目则可以直接拉取用户的菜单，注意：菜单可以直接复制路由
             store.dispatch('generateRoutes', functions).then((res) => {
               // 根据roles权限生成可访问的路由表

@@ -413,6 +413,7 @@
             return {
               id: node.id,
               title: node.menuName,
+              expand: true,
               children: (node.children && node.children.map(mapper)) || []
             }
           }
@@ -423,7 +424,6 @@
             this.listQuery.functionId = this.currentTreeNode.id
             // 这里要注意，扩展响应式属性需要这么写
             this.$set(this.treeData[0], 'selected', true)
-            this.$set(this.treeData[0], 'expand', true)
             this.resetQuery()
           }
         })

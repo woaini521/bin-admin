@@ -1,5 +1,9 @@
 import { asyncRouterMap, constantRouterMap } from '../../router/routes'
 import path from 'path'
+import util from '../../utils/util'
+
+// 调试标识
+const log = false
 
 /**
  * 过滤账户是否拥有某一个权限，并将菜单从加载列表移除,这里暂时通过这种方式获取
@@ -14,8 +18,13 @@ function hasPermission (functions, route, basePath = '') {
     return true
   } else {
     const tempPath = path.resolve(basePath, route.path)
-    console.log(tempPath)
-    return functions.indexOf(tempPath) > -1
+    const flag = tempPath === '/*' || functions.includes(tempPath)
+
+    if (log) {
+      let title = route.meta ? route.meta.title : basePath.length === 0 ? '父路由' : '子路由'
+      util.log.pretty(title, `${tempPath} 匹配${flag ? '成功' : '失败'}`, flag ? 'primary' : 'danger')
+    }
+    return flag
   }
 }
 
@@ -24,7 +33,6 @@ function filterAsyncRoutes (routes, functions, basePath = '') {
   routes.forEach(route => {
     const tmp = { ...route }
     if (hasPermission(functions, tmp, basePath)) {
-      // console.log(`匹配[${parentPath.length === 0 ? '父级路由' : '子路由'}] ${tmp.path} 路由成功`)
       const tempPath = path.resolve(basePath, tmp.path)
       if (tmp.children) {
         tmp.children = filterAsyncRoutes(tmp.children, functions, tempPath)
@@ -52,6 +60,9 @@ const permission = {
   actions: {
     generateRoutes ({ commit }, functions) {
       return new Promise(resolve => {
+        if (log) {
+          console.log(functions)
+        }
         const accessedRouters = filterAsyncRoutes(asyncRouterMap, functions)
         commit('SET_ROUTERS', accessedRouters)
         resolve(accessedRouters)

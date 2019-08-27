@@ -1,9 +1,5 @@
 import layout from '../layout/layout'
 import sys from './modules/sys'
-import org from './modules/org'
-import auth from './modules/auth'
-import logs from './modules/logs'
-import setting from './modules/setting'
 
 /**
  * router自定义配置项
@@ -19,7 +15,7 @@ import setting from './modules/setting'
   }
  **/
 export const asyncRouterMap = [
-  sys, org, auth, setting,
+  sys,
   { path: '*', redirect: '/404', hidden: true }
 ]
 
