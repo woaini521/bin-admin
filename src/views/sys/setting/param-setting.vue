@@ -134,7 +134,7 @@
             </b-tag>
           </span>
         </div>
-        <div class="item">
+        <div class="item" v-if="settingVisible">
           <span>参数值：</span>
           <span>
             <param-conf :value-mode="conf.valueMode" :options="conf.bufferValue" v-model="conf.realValue"></param-conf>
@@ -156,6 +156,7 @@
   import { getValueMode } from '../../../api/enum'
   import * as api from '../../../api/sys/paramConf'
   import ParamConf from '../components/param-conf'
+  import { deepCopy } from '../../../utils/assist'
   // 非空字段提示
   const requiredRule = { required: true, message: '必填项', trigger: 'blur' }
   export default {
@@ -275,14 +276,14 @@
       // 编辑事件
       handleModify (row) {
         this.resetConf()
-        this.conf = { ...this.conf, ...row }
+        this.conf = deepCopy({ ...this.conf, ...row })
         this.stringToBuffer()
         this.openEditPage('modify')
       },
       // 设置操作按钮
       handleSet (row) {
         this.resetConf()
-        this.conf = { ...this.conf, ...row }
+        this.conf = deepCopy({ ...this.conf, ...row })
         this.stringToBuffer()
         this.settingVisible = true
       },
@@ -296,7 +297,7 @@
             break
           case this.ENUM.RADIO:
             const choose = this.conf.bufferValue.find(item => item.value === this.conf.realValue)
-            this.conf.confValue = choose.label
+            this.conf.confValue = choose ? choose.label : ''
             break
           case this.ENUM.CHECKBOX:
             this.conf.confValue = this.conf.bufferValue
@@ -348,6 +349,7 @@
           if (valid) {
             // 根据bufferValue中的值来填充两个字符串
             this.bufferToString() // 转换缓存数组
+            this.conf.realValue = this.conf.confValue = ''// 无论新增还是修改，都需要清空两个值
             this.btnLoading = true
             let fun = this.dialogStatus === 'create' ? api.createConf : api.modifyConf
             fun(this.conf).then(res => {
@@ -355,7 +357,7 @@
                 this.btnLoading = false
                 this.dialogFormVisible = false
                 this.$message({ type: 'success', content: '操作成功' })
-                this.searchList()
+                this.handleFilter()
               } else {
                 this.$message({ type: 'error', content: res.data.message })
               }
@@ -426,7 +428,7 @@
           confCode: '',
           confValue: '', // 参数值，即参数值，存储显示值，字符串时需要同步显示值和实际值
           realValue: '', // 内部值,及实际存储数据库中的值，字符串模式时需要同步至实际值
-          valueMode: this.ENUM.STRING, // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
+          valueMode: this.ENUM.STRING, // { '0': '数字','1': '字符串', '2': '内部单选', '3': '内部多选' }
           valueRange: '', // 取值范围，及显示值
           realValueRange: '', // 内部值，及value实际值
           sortNum: 0,

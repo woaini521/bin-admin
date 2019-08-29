@@ -7,7 +7,7 @@ export default {
   name: 'param-conf',
   data () {
     return {
-      currentValue: this.value,
+      currentValue: '',
       items: [],
       number: 0
     }
@@ -19,7 +19,7 @@ export default {
     },
     valueMode: {
       type: String,
-      default: '1' // { '1': '字符串', '2': '内部单选', '3': '内部多选' }
+      default: '0' // { '0': '数字','1': '字符串', '2': '内部单选', '3': '内部多选' }
     },
     options: {
       type: Array,
@@ -42,7 +42,7 @@ export default {
       case STRING:
         node = h('b-input', {
           props: {
-            value: this.value,
+            value: this.currentValue,
             placeholder: '请输入参数值',
             clearable: true
           },
@@ -51,7 +51,7 @@ export default {
         break
       case RADIO:
         node = h('b-radio-group', {
-            props: { value: this.value },
+            props: { value: this.currentValue },
             on: { input: this.radioChange }
           },
           this.options.map((item) => {
@@ -73,6 +73,9 @@ export default {
           })
         )
         break
+      default:
+        node = h('span', ['参数占位符'])
+        break
     }
     return node
   },
@@ -82,22 +85,25 @@ export default {
         // 缓存选中数组
         this.items = this.valueMode === CHECKBOX ? val.split(',') : []
         this.number = this.valueMode === NUM ? Number(this.value) : 0
+        this.currentValue = val
       },
       immediate: true
     }
   },
   methods: {
-    // 输入框输入
+    // 数字输入框输入
     handleInputNum (value) {
       this.$emit('input', value.toString())
     },
     // 输入框输入
     handleInput (value) {
-      this.$emit('input', value)
+      this.currentValue = value
+      this.$emit('input', this.currentValue)
     },
     // 单选框改变
     radioChange (value) {
-      this.$emit('input', value)
+      this.currentValue = value
+      this.$emit('input', this.currentValue)
     },
     // 多选框数组转换成字符串
     checkboxChange (arr) {
