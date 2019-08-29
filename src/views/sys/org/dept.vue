@@ -27,6 +27,10 @@
       <template v-slot:departName="scope">
         <a href="" @click.stop.prevent="handleCheck(scope.row)">{{ scope.row.departName }}</a>
       </template>
+      <!--类型-->
+      <template v-slot:departKind="scope">
+        {{ deptMap[scope.row.departKind] }}
+      </template>
       <!--状态-->
       <template v-slot:status="scope">
         <b-switch v-model="scope.row.status" :true-value="ENUM.ENABLE" :false-value="ENUM.DISABLE"
@@ -81,9 +85,9 @@
             </b-form-item>
             <b-form-item label="部门类型" prop="departKind">
               <b-select v-model="depart.departKind">
-                <!--这里暂时是直接存储字符串值到后台，故不是key-value枚举值-->
-                <b-option value="机构">机构</b-option>
-                <b-option value="一般组织">一般组织</b-option>
+                <b-option v-for="item in departKindOptions" :key="item.value" :value="item.value">
+                  {{ item.label }}
+                </b-option>
               </b-select>
             </b-form-item>
           </div>
@@ -120,7 +124,7 @@
   import commonMixin from '../../../mixins/mixin'
   import permission from '../../../mixins/permission'
   import * as api from '../../../api/sys/depart'
-  import { getDeptStatus } from '../../../api/enum'
+  import { getDeptStatus, getDeptType } from '../../../api/enum'
   import { verifyUnifiedCode } from '../../../utils/validate'
 
   // 非空字段提示
@@ -151,14 +155,14 @@
         }
       }
       const validateFullName = (rule, value, callback) => {
-        if (this.depart.departKind === this.ENUM.COMMON && value.length === 0) {
+        if (this.depart.departKind === this.ENUM.NORMAL && value.length === 0) {
           callback(new Error('一般组织类型需要填写部门全称'))
         } else {
           callback()
         }
       }
       const validateUnified = (rule, value, callback) => {
-        if (this.depart.departKind === this.ENUM.COMMON) {
+        if (this.depart.departKind === this.ENUM.NORMAL) {
           if (value.length === 0) {
             callback(new Error('一般组织必须填写此项'))
           } else if (value === '00000000000000000X') {
@@ -220,7 +224,7 @@
             }
           },
           { title: '部门名称', slot: 'departName' },
-          { title: '部门类型', key: 'departKind', width: 120, align: 'center' },
+          { title: '部门类型', slot: 'departKind', width: 120, align: 'center' },
           { title: '部门全称', key: 'fullName' },
           { title: '状态', slot: 'status', width: 180, align: 'center' },
           { title: '操作', slot: 'action', width: 180 }
@@ -235,16 +239,25 @@
           fullName: [{ validator: validateFullName, trigger: 'blur' }],
           unifiedCode: [{ validator: validateUnified, trigger: 'blur' }]
         },
-        statusMap: { 'D': '禁用', 'Y': '启用' } // 默认值这里Y是可以删除，可删除状态及为禁用
+        statusMap: { 'D': '禁用', 'Y': '启用' }, // 默认值这里Y是可以删除，可删除状态及为禁用
+        deptMap: { 'DOMAIN': '机构', 'NORMAL': '一般组织' }
       }
     },
     computed: {
+      departKindOptions () {
+        let ret = []
+        Object.keys(this.deptMap).forEach(key => {
+          ret.push({ value: key, label: this.deptMap[key] })
+        })
+        return ret
+      },
       ENUM () {
-        return { DISABLE: 'D', ENABLE: 'Y', ORG: '机构', COMMON: '一般组织' } // 常量比对键值对
+        return { DISABLE: 'D', ENABLE: 'Y', ORG: 'DOMAIN', NORMAL: 'NORMAL' } // 常量比对键值对
       }
     },
     created () {
       this.getDeptStatusEnum()
+      this.getDeptTypeEnum()
       this.resetDept()
       this.initTree()
     },
@@ -297,6 +310,7 @@
         api.changeStatus(depart).then(res => {
           if (res.data.code === '0') {
             this.$message({ type: 'success', content: '操作成功' })
+            this.initTree()
           } else {
             this.$message({ type: 'danger', content: '操作失败' })
           }
@@ -348,6 +362,14 @@
         getDeptStatus().then(res => {
           if (res.status === 200) {
             this.statusMap = res.data.data
+          }
+        })
+      },
+      // 部门类型枚举
+      getDeptTypeEnum () {
+        getDeptType().then(res => {
+          if (res.status === 200) {
+            this.deptMap = res.data.data
           }
         })
       },

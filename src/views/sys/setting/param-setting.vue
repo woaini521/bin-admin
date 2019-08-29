@@ -1,7 +1,8 @@
 <template>
   <v-table-layout>
     <!--树结构-->
-    <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
+    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect"
+            @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="参数名称">
@@ -64,14 +65,9 @@
       <!--增加编辑区域-->
       <div v-else style="width: 880px;padding: 20px 0 0 60px;">
         <b-form :model="conf" ref="form" :rules="ruleValidate" :label-width="100">
-          <div flex="box:mean">
-            <b-form-item label="所属类型" class="bin-form-item-required">
-              <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
-            </b-form-item>
-            <b-form-item label="类别ID" class="bin-form-item-required">
-              <b-input :value="conf.typeId" disabled></b-input>
-            </b-form-item>
-          </div>
+          <b-form-item label="所属类型" class="bin-form-item-required">
+            <b-input v-if="currentTreeNode" :value="currentTreeNode.title" disabled></b-input>
+          </b-form-item>
           <div flex="box:mean">
             <b-form-item label="参数名称" prop="confName">
               <b-input v-model="conf.confName" placeholder="请输入参数名称" clearable></b-input>
@@ -257,9 +253,8 @@
         this.listQuery.typeId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
           this.conf.typeId = node.id
-        } else {
-          this.handleFilter()
         }
+        this.handleFilter()
       },
       // filter-Bar:重置查询条件
       resetQuery () {

@@ -1,7 +1,7 @@
 <template>
   <v-table-layout>
     <!--树结构-->
-    <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
+    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect" @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="类别名称">
@@ -149,9 +149,8 @@
         this.listQuery.parentId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
           this.type.parentId = node.id
-        } else {
-          this.handleFilter()
         }
+        this.handleFilter()
       },
       // filter-Bar:重置查询条件
       resetQuery () {

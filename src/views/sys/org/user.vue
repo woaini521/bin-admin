@@ -1,7 +1,7 @@
 <template>
   <v-table-layout>
     <!--树结构-->
-    <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
+    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect" @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="登录名称">
@@ -253,11 +253,6 @@
     methods: {
       /* [事件响应] */
       handTreeCurrentChange (data, node) {
-        if (this.dialogFormVisible && this.dialogStatus === 'check') { // 查询模式锁定树选择
-          node.selected = false // 取消点击节点选中并重新设置当前选中
-          this.currentTreeNode.selected = true
-          return
-        }
         this.currentTreeNode = node
         this.listQuery.departId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
@@ -329,6 +324,7 @@
                 this.$message({ type: 'success', content: '操作成功' })
                 this.handleFilter()
               } else {
+                this.btnLoading = false
                 this.$message({ type: 'error', content: res.data.message })
               }
             })

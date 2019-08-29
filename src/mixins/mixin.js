@@ -32,10 +32,20 @@ export default {
     treeTableWidth () {
       // 包含树结构的表格宽度= wrap -15*2 - 20*2 -200
       return this.tableWrapWidth - 270
+    },
+    lockTreeSelect () {
+      return this.dialogStatus === 'check' || this.dialogStatus === 'modify'
     }
   },
   mounted () {
     this.$EventBus.$on('/layout/resize', this._resizeTable)
+  },
+  watch: {
+    dialogFormVisible (val) {
+      if (!val) {
+        this.dialogStatus = ''
+      }
+    }
   },
   methods: {
     // 1.监听窗口变化重置表格最大高度
