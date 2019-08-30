@@ -1,7 +1,8 @@
 <template>
   <v-table-layout>
     <!--树结构-->
-    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect" @on-select-change="handTreeCurrentChange"></b-tree>
+    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect" ref="tree"
+            @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="类别名称">
@@ -237,22 +238,19 @@
         // 请求响应返回树结构
         api.getTypeTree().then(response => {
           const tree = response.data.data || []
-          let mapper = node => {
-            return {
-              id: node.id,
-              title: node.text,
-              children: (node.children && node.children.map(mapper)) || []
-            }
-          }
-          let data = tree[0] ? mapper(tree[0]) : []
+          // 根据返回的数组格式化为树结构的格式，并追加parents用于级联选择和展开
+          let data = tree[0] ? this.treeMapper(tree[0]) : {}
           this.treeData.push(data)
           if (this.treeData.length > 0) {
-            this.currentTreeNode = this.treeData[0]
+            // 如果没有当前选中节点则初始化为第一个选中
+            if (!this.currentTreeNode) {
+              this.currentTreeNode = this.treeData[0]
+              // 这里要注意，扩展响应式属性需要这么写
+              this.$set(this.treeData[0], 'selected', true)
+              this.$set(this.treeData[0], 'expand', true)
+            }
             this.listQuery.parentId = this.currentTreeNode.id
-            // 这里要注意，扩展响应式属性需要这么写
-            this.$set(this.treeData[0], 'selected', true)
-            this.$set(this.treeData[0], 'expand', true)
-            this.searchList()
+            this.handleFilter()
           }
         })
       },
