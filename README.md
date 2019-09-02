@@ -1,5 +1,7 @@
 # bin-admin
 
+测试修改记录来自ncloud-ui
+
 [文档](https://wangbin3162.github.io/docs/bin-admin/)
 
 [预览](https://wangbin3162.github.io/preview/bin-admin/)
