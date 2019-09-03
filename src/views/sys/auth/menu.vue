@@ -1,7 +1,8 @@
 <template>
   <v-table-layout>
     <!--树结构-->
-    <b-tree :data="treeData" slot="tree" @on-select-change="handTreeCurrentChange"></b-tree>
+    <b-tree :data="treeData" slot="tree" :lock-select="lockTreeSelect"
+            @on-select-change="handTreeCurrentChange"></b-tree>
     <!--查询条件-->
     <v-filter-bar slot="filter">
       <v-filter-item title="菜单名称">
@@ -62,7 +63,7 @@
     <!--编辑抽屉-->
     <b-drawer v-model="dialogFormVisible" :append-to-body="false" fullscreen footer-hide :title="editTitle">
       <!--查询内容区域-->
-      <div v-if="dialogStatus==='check'" style="width: 880px;padding: 20px 0 0 20px;user-select:text;">
+      <div v-if="isCheck" style="width: 880px;padding: 20px 0 0 20px;user-select:text;">
         <v-key-label label="上级菜单" is-half is-first>{{ currentTreeNode.title }}</v-key-label>
         <v-key-label label="菜单名称" is-half>{{ menu.name }}</v-key-label>
         <v-key-label label="菜单类型" is-half is-first>
@@ -84,7 +85,7 @@
         </div>
       </div>
       <!--增加编辑区域-->
-      <div v-else style="width: 880px;padding: 20px 0 0 60px;">
+      <div v-if="isEdit" style="width: 880px;padding: 20px 0 0 60px;">
         <b-form :model="menu" ref="form" :rules="ruleValidate" :label-width="100">
           <div flex="box:mean">
             <b-form-item label="上级菜单" class="bin-form-item-required">
@@ -183,7 +184,7 @@
         listQuery: {
           menuName: '',
           parentId: '', // 父菜单id
-          delFlag: ''
+          delFlag: 'N'
         },
         treeData: [],
         columns: [
@@ -227,18 +228,12 @@
     methods: {
       /* [事件响应] */
       handTreeCurrentChange (data, node) {
-        if (this.dialogFormVisible && this.dialogStatus === 'check') { // 查询模式锁定树选择
-          node.selected = false // 取消点击节点选中并重新设置当前选中
-          this.currentTreeNode.selected = true
-          return
-        }
         this.currentTreeNode = node
         this.listQuery.parentId = node.id
         if (this.dialogFormVisible) { // 如果打开了右侧编辑区域则不需要查询，并且需要缓存当前树节点，需要修改父节点id
           this.menu.parentId = node.id
-        } else {
-          this.handleFilter()
         }
+        this.handleFilter()
       },
       // filter-Bar:重置查询条件
       resetQuery () {
@@ -408,25 +403,47 @@
         this.treeData = []
         // 请求响应返回树结构
         api.getMenuTree().then(response => {
-          const tree = response.data.data || {}
-          let mapper = node => {
-            return {
-              id: node.id,
-              title: node.menuName,
-              expand: true,
-              children: (node.children && node.children.map(mapper)) || []
-            }
-          }
-          let data = mapper(tree)
+          const tree = response.data.data
+          // 根据返回的数组格式化为树结构的格式，并追加parents用于级联选择和展开
+          let data = tree ? this.treeMapper(tree) : {}
           this.treeData.push(data)
           if (this.treeData.length > 0) {
-            this.currentTreeNode = this.treeData[0]
-            this.listQuery.functionId = this.currentTreeNode.id
-            // 这里要注意，扩展响应式属性需要这么写
-            this.$set(this.treeData[0], 'selected', true)
-            this.resetQuery()
+            // 如果没有当前选中节点则初始化为第一个选中
+            if (!this.currentTreeNode) {
+              this.currentTreeNode = this.treeData[0]
+              // 这里要注意，扩展响应式属性需要这么写
+              this.$set(this.treeData[0], 'selected', true)
+              this.$set(this.treeData[0], 'expand', true)
+            }
+            this.listQuery.parentId = this.currentTreeNode.id
+            this.handleFilter()
           }
         })
+      },
+      // 树节点格式化mapper
+      treeMapper (node, parentId) {
+        // 当前id
+        const currentId = node.id
+        let parents = parentId ? parentId.split(',') : []
+        parents.push(currentId)
+        let child = []
+        if (node.children) {
+          node.children.forEach(item => {
+            child.push(this.treeMapper(item, parents.join(',')))
+          })
+        }
+        // 是否是选中状态
+        let isSelect = this.currentTreeNode ? this.currentTreeNode.id === currentId : false
+        // 是否是展开状态，根据当前选择的节点中的parents数组来判定自身和父级的展开状态
+        let isExpand = this.currentTreeNode ? this.currentTreeNode.parents.includes(currentId) : false
+        return {
+          id: node.id,
+          title: node.menuName, // 返回值不同
+          parents: parents, // 配合级联展开时使用
+          selected: isSelect,
+          expand: isExpand, // 先全部打开,后再进行比对关闭
+          children: child
+        }
       },
       // 查询所有部门列表
       searchList () {
