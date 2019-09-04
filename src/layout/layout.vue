@@ -23,7 +23,7 @@
       <tags-view></tags-view>
       <div class="app-main" ref="contentWrapper">
         <transition name="fade-transverse" mode="out-in" @enter="calcTableWidth">
-          <keep-alive :include="cachedViews">
+          <keep-alive :include="keepAliveArr">
             <router-view :key="key"></router-view>
           </keep-alive>
         </transition>
@@ -45,6 +45,13 @@
       ...mapGetters(['sidebar', 'menuType', 'cachedViews']),
       key () {
         return this.$route.fullPath
+      },
+      // 缓存路由 注意：这里缓存的即为所有包裹路由的名称
+      // 一级路由则可直接使用
+      // 如/系统管理/授权管理/菜单管理 ，系统管理内容统一设置为二级路由，则需要额外添加一些缓存数组
+      keepAliveArr () {
+        // 由于cachedViews缓存的是一级路由，这里则需要将二级路由缓存拼接上,二级路由如果是keepAlive，则一级路由都会缓存
+        return ['Sys', 'Dir'].concat(this.cachedViews)
       },
       isCollapseLeft () {
         if (this.sidebar) {
